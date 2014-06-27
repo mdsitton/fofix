@@ -7,6 +7,7 @@ hg+http://bitbucket.org/pygame/pygame#egg=pygame
 PyOpenGL
 PyOpenGL-accelerate
 Pillow
+Cerealizer
 
 # The latest version of this is not on PyPI.
 http://people.csail.mit.edu/hubert/pyaudio/packages/pyaudio-0.2.8.tar.gz#egg=PyAudio
