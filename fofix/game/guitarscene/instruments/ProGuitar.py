@@ -60,15 +60,7 @@ class ProGuitar(Guitar):
                 engine.loadImgDrawing(self, "noteAnimatedPowerActive", get("animated_power_active.png"))
                 engine.loadImgDrawing(self, "noteAnimatedPowerActiveHOPO", get("animated_power_active_hopo.png"))
 
-                if self.gameMode2p == 6: #battle multiplayer
-                    if engine.loadImgDrawing(self, "noteButtons", get("spinnotesbattle.png")):
-                        self.starSpinFrames = 8
-
-            if self.gameMode2p == 6: #battle multiplayer
-                if not self.engine.loadImgDrawing(self, "noteButtons", get("notesbattle.png")):
-                    engine.loadImgDrawing(self, "noteButtons", get("notes.png"))
-            else:
-                engine.loadImgDrawing(self, "noteButtons", get("notes.png"))
+            engine.loadImgDrawing(self, "noteButtons", get("notes.png"))
 
             #if special notes for pro aren't found then it will need to
             #draw using font the number of the fret over the note
@@ -303,19 +295,10 @@ class ProGuitar(Guitar):
                             for dfEvent in self.drumFillEvents:
                                 dfEvent.happened = True
                         Log.debug("star power added")
-                        if self.gameMode2p == 6 and not self.isDrum:
-                            if self.battleSuddenDeath:
-                                self.battleObjects = [1] + self.battleObjects[:2]
-                            else:
-                                self.battleObjects = [self.battleObjectsEnabled[random.randint(0,len(self.battleObjectsEnabled)-1)]] + self.battleObjects[:2]
-                            self.battleGetTime = pos
-                            self.battleObjectGained = True
-                            Log.debug("Battle Object Gained, Objects %s" % str(self.battleObjects))
-                        else:
-                            if self.starPower < 100:
-                                self.starPower += 25
-                            if self.starPower > 100:
-                                self.starPower = 100
+                        if self.starPower < 100:
+                            self.starPower += 25
+                        if self.starPower > 100:
+                            self.starPower = 100
                         self.overdriveFlashCount = 0  #MFH - this triggers the oFlash strings & timer
                         self.starPowerGained = True
 
@@ -353,12 +336,7 @@ class ProGuitar(Guitar):
             if shaders.turnon:
                 shaders.setVar("note_position",(x, (1.0 - visibility) ** (event.number + 1), z),"notes")
 
-            if self.battleStatus[8]:
-                renderNote = random.randint(0,2)
-            else:
-                renderNote = 0
-            if renderNote == 0:
-                self.renderNote(length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, string = event.lane, fret = event.number, spNote = spNote)
+            self.renderNote(length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, string = event.lane, fret = event.number, spNote = spNote)
             glPopMatrix()
 
         #myfingershurt: end FOR loop / note rendering loop

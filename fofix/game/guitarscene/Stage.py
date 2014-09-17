@@ -390,8 +390,6 @@ class Stage(object):
     def load(self, libraryName, songName, practiceMode = False):
         if self.scene.coOpType:
             rm = os.path.join("themes", self.themename, "rockmeter_coop.ini")
-        elif self.scene.battle or self.scene.battleGH:
-            rm = os.path.join("themes", self.themename, "rockmeter_profaceoff.ini")
         elif self.scene.gamePlayers > 1:
             rm = os.path.join("themes", self.themename, "rockmeter_faceoff.ini")
         else:
