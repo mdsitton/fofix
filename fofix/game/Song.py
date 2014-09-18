@@ -24,7 +24,6 @@
 
 import os
 import re
-import copy
 import time
 import random
 import urllib
@@ -871,7 +870,7 @@ class SortTitleInfo(object):
         return self.name
 
 
-class Event:
+class Event(object):
     def __init__(self, length):
         self.length = length
 
@@ -882,6 +881,9 @@ class MarkerNote(Event): #MFH
         self.number   = number
         self.endMarker = endMarker
         self.happened = False
+
+    def copy(self):
+        return MarkerNote(self.number, self.length, endMarker=self.endMarker)
 
     def __repr__(self):
         return "<#%d>" % self.number
@@ -904,6 +906,13 @@ class Note(Event):
         self.noteBpm = 0.0
         #pro-mode
         self.lane = 0               #named lane to be vague so then it can be used in guitar and drums
+
+    def copy(self):
+        return Note(self.number, self.length,
+                    special=self.special,
+                    tappable=self.tappable,
+                    star=self.star,
+                    finalStar=self.finalStar,)
 
     def __repr__(self):
         return "<#%d>" % self.number
@@ -2534,11 +2543,10 @@ class MidiReader(midi.MidiOutStream):
                 for s in t:
                     s.addEvent(time, event)
         else:
-
             tracklist = [i for i,j in enumerate(self.song.parts) if self.partnumber == j]
             for i in tracklist:
                 #Each track needs it's own copy of the event, otherwise they'll interfere
-                eventcopy = copy.deepcopy(event)
+                eventcopy = event.copy()
                 if track < len(self.song.tracks[i]):
                     self.song.tracks[i][track].addEvent(time, eventcopy)
 
@@ -2619,7 +2627,7 @@ class MidiReader(midi.MidiOutStream):
             tracklist = [i for i,j in enumerate(self.song.parts) if self.partnumber == j]
             for i in tracklist:
                 #Each track needs it's own copy of the event, otherwise they'll interfere
-                eventcopy = copy.deepcopy(event)
+                eventcopy = event.copy()
                 if track < len(self.song.midiEventTracks[i]):
                     self.song.midiEventTracks[i][track].addEvent(time, eventcopy)
 
