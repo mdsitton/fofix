@@ -36,7 +36,6 @@ from fofix.game.guitarscene.instruments.Instrument import Instrument
 from fofix.game.guitarscene.Neck import Neck
 from fofix.game.Song import Note, Tempo
 from fofix.core.Image import draw3Dtex
-from fofix.core.Shader import shaders
 from fofix.core.Mesh import Mesh
 from fofix.game import Song
 from fofix.core import cmgl
@@ -278,7 +277,6 @@ class Drum(Instrument):
                                   scale = (1,1,1), rot = (self.camAngle,1,0,0), multiples = False, color = color)
 
         else: #3d Notes
-            shaders.setVar("Material",color,"notes")
 
             self.notepos = self.engine.theme.drumnotepos
             self.noterot = self.engine.theme.drumnoterot
@@ -607,11 +605,6 @@ class Drum(Instrument):
 
     def render(self, visibility, song, pos, controls, killswitch):
 
-        if shaders.turnon:
-            shaders.globals["dfActive"] = self.drumFillsActive
-            shaders.globals["breActive"] = self.freestyleActive
-            shaders.globals["rockLevel"] = self.rockLevel
-
         if not self.starNotesSet == True:
             self.totalNotes = 0
             for time, event in song.track[self.player].getAllEvents():
@@ -759,10 +752,6 @@ class Drum(Instrument):
                         self.currentGuitarSoloHitNotes += 1
                     if i == 0 and self.fretboardHop < 0.07:
                         self.fretboardHop = 0.07  #stump
-
-                    if shaders.turnon:
-                        shaders.var["fret"][self.player][note.number]=shaders.time()
-                        shaders.var["fretpos"][self.player][note.number]=pos
 
                     return self.hitNote(time, note)
 

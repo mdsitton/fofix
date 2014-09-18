@@ -776,17 +776,6 @@ class SettingsMenu(Menu.Menu):
         ]
         self.neckTransparencyMenu = Menu.Menu(self.engine, self.neckTransparency, pos = (self.opt_text_x, self.opt_text_y), textColor = self.opt_text_color, selectedColor = self.opt_selected_color)
 
-        self.shaderSettings = [      #volshebnyi
-          ConfigChoice(self.engine, self.engine.config, "video", "shader_use", autoApply = True),
-          ConfigChoice(self.engine, self.engine.config, "video", "shader_neck", autoApply = True),
-          ConfigChoice(self.engine, self.engine.config, "video", "shader_stage", autoApply = True),
-          ConfigChoice(self.engine, self.engine.config, "video", "shader_sololight", autoApply = True),
-          ConfigChoice(self.engine, self.engine.config, "video", "shader_tail", autoApply = True),
-          ConfigChoice(self.engine, self.engine.config, "video", "shader_notes", autoApply = True),
-          ConfigChoice(self.engine, self.engine.config, "video", "shader_cd", autoApply = True),
-        ]
-        self.shaderSettings = Menu.Menu(self.engine, self.shaderSettings, pos = (self.opt_text_x, self.opt_text_y), textColor = self.opt_text_color, selectedColor = self.opt_selected_color)
-
         self.advancedVideoSettings = [
           ConfigChoice(self.engine, self.engine.config, "engine", "highpriority", isQuickset = 1),
           ConfigChoice(self.engine, self.engine.config, "video",  "fps", isQuickset = 1),
@@ -797,7 +786,6 @@ class SettingsMenu(Menu.Menu):
           ConfigChoice(self.engine, self.engine.config, "video",  "multisamples", isQuickset = 1),
           ConfigChoice(self.engine, self.engine.config, "performance", "static_strings", autoApply = True, isQuickset = 1),      #myfingershurt
           ConfigChoice(self.engine, self.engine.config, "performance", "killfx", autoApply = True, isQuickset = 1),   #blazingamer
-          (_("More Effects"), self.shaderSettings, _("Change the settings of the shader system.")), #volshebnyi
         ]
         self.advancedVideoSettingsMenu = Menu.Menu(self.engine, self.advancedVideoSettings, pos = (self.opt_text_x, self.opt_text_y), textColor = self.opt_text_color, selectedColor = self.opt_selected_color)
 
@@ -1422,7 +1410,6 @@ def quickset(config):
         config.set("game", "midi_lyric_mode", 2)
         config.set("video", "fps", 60)
         config.set("video", "multisamples", 0)
-        config.set("video", "shader_use", False)
         config.set("coffee", "game_phrases", 0)
         config.set("game", "stage_animate", 0)
         config.set("game", "lyric_mode", 0)
@@ -1496,7 +1483,6 @@ def quickset(config):
         config.set("game", "midi_lyric_mode", 0)
         config.set("video", "fps", 60)
         config.set("video", "multisamples", 4)
-        config.set("video", "shader_use", True)
         config.set("coffee", "game_phrases", 2)
         config.set("game", "partial_stars", 1)
         config.set("game", "lyric_mode", 2)

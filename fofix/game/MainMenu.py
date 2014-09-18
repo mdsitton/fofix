@@ -31,7 +31,6 @@ import os
 
 from fofix.core.View import BackgroundLayer
 from fofix.core.Image import drawImage
-from fofix.core.Shader import shaders
 from fofix.game.Lobby import Lobby
 from fofix.core.constants import *
 from fofix.core.Language import _
@@ -227,7 +226,6 @@ class MainMenu(BackgroundLayer):
 
     def shown(self):
         self.engine.view.pushLayer(self.menu)
-        shaders.checkIfEnabled()
         if not self.shownOnce:
             self.shownOnce = True
             if hasattr(sys, 'frozen'):

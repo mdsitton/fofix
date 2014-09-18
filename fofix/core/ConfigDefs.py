@@ -57,14 +57,6 @@ Config.define("video",  "fps",          int,   60,    text = _("Frames per Secon
 Config.define("video",  "show_fps",     bool,   False,  text = _("Print Frames per Second"), options = {False: _("No"), True: _("Yes")}, tipText = _("This will display your FPS on some screens, and if running from sources will print your FPS there every two seconds."))
 Config.define("video",  "hitglow_color", int,  0,     text = _("Fret Glow Color"), options = {0: _("Same as Fret"), 1: _("Actual Color")}, tipText = _("Sets whether or not the fret glow image will be color-masked with the theme-determined fret color."))
 
-Config.define("video",  "shader_use",     bool,   True,  text = _("Use Shaders"), options = {False: _("No"), True: _("Yes")}, tipText = _("Enable or disable the use of shaders. Shaders are visual effects. This must be set to 'Yes' to use the settings below. 'By Theme' leaves it to the theme creator."))
-Config.define("video",  "shader_neck",     str,   "theme",  text = _("Neck"), options = {"Disabled":_("Disabled"), "neck": _("Flashing"), "theme": _("By Theme")}, tipText = _("A bright flash along your fretboard reflecting the notes you've hit. 'By Theme' leaves it to the theme creator."))
-Config.define("video",  "shader_stage",     str,   "theme",  text = _("Stage"), options = {"Disabled":_("Disabled"), "stage": _("EQ Lightning"), "theme": _("By Theme")}, tipText = _("A visual waveform centered above you fretboard. 'By Theme' leaves it to the theme creator."))
-Config.define("video",  "shader_sololight",     str,   "sololight",  text = _("Solo and SP"), options = {"Disabled":_("Disabled"), "sololight": _("Lightnings"), "theme": _("By Theme")}, tipText = _("Enables lightning along the side of your fretboard when you are in solos or use SP. 'By Theme' leaves it to the theme creator."))
-Config.define("video",  "shader_tail",     str,   "tail2",  text = _("Tails"), options = {"Disabled":_("Classic"), "tail1": _("Lightnings"), "tail2": _("RB2"), "theme": _("By Theme")}, tipText = _("Sets the tail effect. Choose from classic tails, lightning, or RB2 style. 'By Theme' leaves it to the theme creator."))
-Config.define("video",  "shader_notes",     str,   "theme",  text = _("Notes"), options = {"Disabled":_("Disabled"), "notes": _("Metal"), "theme": _("By Theme")}, tipText = _("Gives your notes a metallic sheen. 'By Theme' leaves it to the theme creator."))
-Config.define("video",  "shader_cd",     str,   "cd",  text = _("CDs"), options = {"None":_("Disabled"), "cd": _("White"), "theme": _("By Theme")}, tipText = _("Adds a soft lighting effect to CD labels in CD setlist mode."))
-
 #stump
 Config.define('video',  'disable_screensaver', bool, True, text=_('Disable Screensaver'), options={True: _('Yes'), False: _('No')}, tipText=_('Set whether the game disables the screensaver while it is running.  Does not necessarily work on all platforms.'))
 

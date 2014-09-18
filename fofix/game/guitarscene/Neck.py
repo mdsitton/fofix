@@ -27,7 +27,6 @@ import random
 from OpenGL.GL import *
 import numpy as np
 
-from fofix.core.Shader import shaders, mixColors
 from fofix.game.Song import Bars
 from fofix.game import Song
 from fofix.core import cmgl
@@ -61,7 +60,6 @@ class Neck:
 
         self.boardWidth     = self.engine.theme.neckWidth
         self.boardLength    = self.engine.theme.neckLength
-        self.shaderSolocolor    = self.engine.theme.shaderSolocolor
 
         self.boardFadeAmount = self.engine.theme.boardFade
 
@@ -105,11 +103,6 @@ class Neck:
                                 [-w / 2, 0, l],
                                 [w / 2, 0, l]], dtype=np.float32)
 
-        self.shader_neck_vtx = np.array([[-w / 2, 0.1, -2],
-                                      [w / 2, 0.1, -2],
-                                      [-w / 2, 0.1, l],
-                                      [w / 2, 0.1, l]], dtype=np.float32)
-
         self.track_vtx = np.array([[-w / 2, 0, -2+size],
                                 [w / 2, 0, -2+size],
                                 [-w / 2, 0, -1+size],
@@ -118,17 +111,6 @@ class Neck:
                                 [w / 2, 0, l * .7],
                                 [-w / 2, 0, l],
                                 [w / 2, 0, l]], dtype=np.float32)
-
-
-        self.soloLightVtx1 = np.array([[w / 2-1.0, 0.4, -2],
-                                    [w / 2+1.0, 0.4, -2],
-                                    [w / 2-1.0, 0.4, l],
-                                    [w / 2+1.0, 0.4, l]], dtype=np.float32)
-
-        self.soloLightVtx2 = np.array([[-w / 2+1.0, 0.4, -2],
-                                    [-w / 2-1.0, 0.4, -2],
-                                    [-w / 2+1.0, 0.4, l],
-                                    [-w / 2-1.0, 0.4, l]], dtype=np.float32)
 
         self.bpm_vtx  = np.array([[-(w / 2), 0,  0],
                                [-(w / 2), 0,  0],
@@ -209,9 +191,6 @@ class Neck:
         self.sidebars_scroll_vtx   = self.sidebars_scroll_vtx.astype(np.float32)
         self.bpm_tex               = self.bpm_tex.astype(np.float32)
         self.bpm_col               = self.bpm_col.astype(np.float32)
-        self.soloLightVtx1         = self.soloLightVtx1.astype(np.float32)
-        self.soloLightVtx2         = self.soloLightVtx2.astype(np.float32)
-        self.shader_neck_vtx       = self.shader_neck_vtx.astype(np.float32)
         self.track_vtx             = self.track_vtx.astype(np.float32)
         self.board_col_flash       = self.board_col_flash.astype(np.float32)
         self.bpm_vtx               = self.bpm_vtx.astype(np.float32)
@@ -595,49 +574,8 @@ class Neck:
 
             self.renderNeckMethod(v*self.neckAlpha[4], offset, neck, alpha)
 
-        if shaders.enabled:
-            shaders.globals["basspos"]        = shaders.var["fret"][self.player][0]
-            shaders.globals["notepos"]        = shaders.var["fret"][self.player][1:]
-            shaders.globals["bpm"]            = self.instrument.currentBpm
-            shaders.globals["songpos"]        = pos
-            shaders.globals["spEnabled"]      = self.instrument.starPowerActive
-            shaders.globals["isFailing"]      = self.isFailing
-            shaders.globals["isMultChanged"]  = (shaders.var["scoreMult"][self.player] != self.scoreMultiplier)
-            if shaders.globals["isMultChanged"]:
-                shaders.var["multChangePos"][self.player]  = pos
-            shaders.globals["scoreMult"]                 = self.scoreMultiplier
-            shaders.var["scoreMult"][self.player]        = self.scoreMultiplier
-            shaders.globals["isDrum"]                    = self.isDrum
-            shaders.globals["soloActive"]                = self.guitarSolo
-
-            posx = shaders.time()
-            neckcol = (0,0,0)
-
-            notecolors = list(self.engine.theme.noteColors)
-            if self.isDrum:
-                notecolors[4] = notecolors[0]
-                notecolors[0] = self.engine.theme.noteColors[5]
-
-
-            for i in range(5):
-                blend   = max(shaders.var["fret"][self.player][i] - posx + 1.5,0.01)
-                neckcol = mixColors(neckcol, notecolors[i], blend)
-
-            shaders.var["color"][self.player]=neckcol
-
-        if shaders.enable("neck"):
-            shaders.setVar("fretcol",neckcol)
-            shaders.update()
-            cmgl.drawArrays(GL_TRIANGLE_STRIP, vertices=self.shader_neck_vtx)
-            shaders.disable()
-        else:
-            if self.isFailing:
-                self.renderNeckMethod(self.failcount, 0, self.failNeck)
-
-        if (self.guitarSolo or self.instrument.starPowerActive) and self.theme == 1:
-            shaders.var["solocolor"]=self.shaderSolocolor
-        else:
-            shaders.var["solocolor"]=(0.0,)*4
+        if self.isFailing:
+            self.renderNeckMethod(self.failcount, 0, self.failNeck)
 
 
     def drawTrack(self, visibility, song, pos):
@@ -698,15 +636,6 @@ class Neck:
 
         cmgl.drawArrays(GL_TRIANGLE_STRIP, vertices=self.sidebars_vtx, colors=board_col, texcoords=self.board_tex)
         glDisable(GL_TEXTURE_2D)
-
-        if shaders.enable("sololight"):
-            shaders.modVar("color",shaders.var["solocolor"])
-            shaders.setVar("offset",(-3.5,-w/2))
-            cmgl.drawArrays(GL_TRIANGLE_STRIP, vertices=self.soloLightVtx1)
-            shaders.setVar("offset",(-3.5,w/2))
-            shaders.setVar("time",shaders.time()+0.5)
-            cmgl.drawArrays(GL_TRIANGLE_STRIP, vertices=self.soloLightVtx2)
-            shaders.disable()
 
     def drawBPM(self, visibility, song, pos):
         if not song:

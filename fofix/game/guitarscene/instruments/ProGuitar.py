@@ -28,7 +28,6 @@ from OpenGL.GL import *
 from fofix.game.guitarscene.instruments.Guitar import Guitar
 from fofix.game.Song import Note, Tempo
 from fofix.core.Image import draw3Dtex
-from fofix.core.Shader import shaders
 from fofix.core.Mesh import Mesh
 from fofix.core import Log
 
@@ -332,9 +331,6 @@ class ProGuitar(Guitar):
 
             glPushMatrix()
             glTranslatef(x, 0, z)
-
-            if shaders.turnon:
-                shaders.setVar("note_position",(x, (1.0 - visibility) ** (event.number + 1), z),"notes")
 
             self.renderNote(length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, string = event.lane, fret = event.number, spNote = spNote)
             glPopMatrix()

@@ -45,7 +45,6 @@ from fofix.game.guitarscene import Rockmeter
 from fofix.game.Scorekeeper import ScoreCard
 from fofix.game.guitarscene import Stage
 from fofix.core.Image import drawImage
-from fofix.core.Shader import shaders
 from fofix.core.Scene import Scene
 from fofix.core.constants import *
 from fofix.core.Language import _
@@ -482,7 +481,6 @@ class GuitarScene(Scene):
         self.logStarpowerMisses = self.engine.config.get("game", "log_starpower_misses")
         self.soloFrameMode = self.engine.config.get("game", "solo_frame")
         self.whammyEffect = self.engine.config.get("audio",  "whammy_effect")
-        shaders.var["whammy"] = self.whammyEffect
         self.bigRockEndings = self.engine.config.get("game", "big_rock_endings")
         self.showFreestyleActive = self.engine.config.get("debug",   "show_freestyle_active")
         self.showBpm = self.engine.config.get("debug",   "show_bpm")    #MFH
@@ -1886,15 +1884,6 @@ class GuitarScene(Scene):
                 instrument.phraseNoteTime = 0
                 instrument.phraseTaps = 0
                 instrument.phraseTapsHit = 0
-        #volshebnyi - shaders reset
-        shaders.reset()
-        if shaders.turnon:
-            for i, player in enumerate(self.playerList):
-                shaders.var["fret"][i]=[-10.0]*5
-                shaders.var["fretpos"][i]=[-10.0]*5
-                shaders.var["color"][i]=(.0,)*4
-                shaders.var["scoreMult"][i]=1
-                shaders.var["multChangePos"][i]=-10.0
         self.failed = False
         self.finalFailed = False
         self.failEnd = False

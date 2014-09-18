@@ -35,7 +35,6 @@ from fofix.core.VideoPlayer import VideoLayer, VideoPlayerError
 from fofix.core.LinedConfigParser import LinedConfigParser
 from fofix.game.guitarscene import Rockmeter
 from fofix.core.Image import drawImage
-from fofix.core.Shader import shaders
 from fofix.core.constants import *
 from fofix.core.Language import _
 from fofix.core import Log
@@ -598,23 +597,6 @@ class Stage(object):
         if self.mode != 3:
             self.renderBackground()
         self.renderLayers(self.backgroundLayers, visibility)
-        if shaders.enable("stage"):
-            height = 0.0
-            for i in shaders.var["color"].keys():
-                shaders.modVar("color",shaders.var["color"][i],0.05,10.0)
-                height += shaders.var["color"][i][3]/3.0
-            height=height**2
-            shaders.setVar("height",2*height)
-            shaders.setVar("ambientGlow",height/1.5)
-
-            shaders.setVar("glowStrength",60+height*80.0)
-            glBegin(GL_TRIANGLE_STRIP)
-            glVertex3f(-8.0, 1.0,7.0)
-            glVertex3f(8.0, 1.0,7.0)
-            glVertex3f(-8.0, 4.0,7.0)
-            glVertex3f(8.0, 4.0,7.0)
-            glEnd()
-            shaders.disable()
 
         self.scene.renderGuitar()
         self.renderLayers(self.foregroundLayers, visibility)

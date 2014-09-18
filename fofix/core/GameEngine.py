@@ -48,7 +48,6 @@ from fofix.core.Data import Data
 from fofix.core.Image import SvgContext, ImgDrawing
 from fofix.core.Language import _
 from fofix.core.Theme import Theme
-from fofix.core.Shader import shaders
 from fofix.core.Image import drawImage
 from fofix.core.timer import FpsTimer
 from fofix.core.Task import TaskEngine
@@ -259,9 +258,6 @@ class GameEngine(object):
         if self.video.default:
             self.config.set("video", "fullscreen", False)
             self.config.set("video", "resolution", "800x600")
-
-        if self.config.get("video", "shader_use"):
-            shaders.set(os.path.join(Version.dataPath(), "shaders"))
 
         # Enable the high priority timer if configured
         if self.priority:

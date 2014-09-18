@@ -38,7 +38,6 @@ from fofix.game.guitarscene.instruments.Instrument import Instrument
 from fofix.game.guitarscene.Neck import Neck
 from fofix.game.Song import Note, Tempo
 from fofix.core.Image import draw3Dtex
-from fofix.core.Shader import shaders
 from fofix.core.Mesh import Mesh
 from fofix.game import Song
 from fofix.core import cmgl
@@ -240,16 +239,6 @@ class Guitar(Instrument):
                     self.freestyleHitFlameCounts[fretNum] = 0    #MFH
 
     def render(self, visibility, song, pos, controls, killswitch):
-
-        if shaders.turnon:
-            shaders.globals["dfActive"] = self.drumFillsActive
-            shaders.globals["breActive"] = self.freestyleActive
-            shaders.globals["rockLevel"] = self.rockLevel
-            if shaders.globals["killswitch"] != killswitch:
-                shaders.globals["killswitchPos"] = pos
-            shaders.globals["killswitch"] = killswitch
-            shaders.modVar("height",0.2,0.2,1.0,"tail")
-
 
         if not self.starNotesSet == True:
             self.totalNotes = 0
@@ -676,11 +665,6 @@ class Guitar(Instrument):
             if note.played != True:
                 continue
 
-            if shaders.turnon:
-                shaders.var["fret"][self.player][note.number]=shaders.time()
-                shaders.var["fretpos"][self.player][note.number]=pos
-
-
             self.pickStartPos = pos
             self.pickStartPos = max(self.pickStartPos, time)
             if hopo:
@@ -729,9 +713,6 @@ class Guitar(Instrument):
         for theFret in range(5):
             self.freestyleHit[theFret] = controls.getState(self.keys[theFret+5])
             if self.freestyleHit[theFret]:
-                if shaders.turnon:
-                    shaders.var["fret"][self.player][theFret]=shaders.time()
-                    shaders.var["fretpos"][self.player][theFret]=pos
                 numHits += 1
         return numHits
 
@@ -747,9 +728,6 @@ class Guitar(Instrument):
         for theFret in range(5):
             self.freestyleHit[theFret] = controls.getState(self.keys[theFret])
             if self.freestyleHit[theFret]:
-                if shaders.turnon:
-                    shaders.var["fret"][self.player][theFret]=shaders.time()
-                    shaders.var["fretpos"][self.player][theFret]=pos
                 numHits += 1
         return numHits
 

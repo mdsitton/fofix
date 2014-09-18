@@ -134,7 +134,6 @@ class Credits(Layer, KeyListener):
         self.bank['logo']       = [_("FoFiX Logo Design")]
         self.bank['hollowmind'] = [_("Hollowmind Necks")]
         self.bank['themes']     = [_("Included Themes")]
-        self.bank['shaders']    = [_("Shaders")]
         self.bank['sounds']     = [_("Sound Design")]
         self.bank['translators']= [_("Translators")]
         self.bank['honorary']   = [_("Honorary Credits")]
