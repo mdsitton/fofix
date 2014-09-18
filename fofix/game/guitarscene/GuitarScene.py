@@ -41,6 +41,7 @@ from OpenGL.GL import *
 from fofix.game.Song import Note, TextEvent, PictureEvent, loadSong, Bars, VocalPhrase
 from fofix.core.Player import STAR, KILL, CANCEL, KEY1A
 from fofix.game.guitarscene.instruments import *
+from fofix.game.guitarscene import Rockmeter
 from fofix.game.Scorekeeper import ScoreCard
 from fofix.game.guitarscene import Stage
 from fofix.core.Image import drawImage
@@ -278,7 +279,7 @@ class GuitarScene(Scene):
         self.multi = [1 for i in self.playerList]
 
         #Get theme
-        themename = self.engine.data.themeLabel
+        self.themeName = self.engine.data.themeLabel
         self.theme = self.engine.data.theme
 
         if self.engine.theme.hopoIndicatorX != None:
@@ -328,8 +329,10 @@ class GuitarScene(Scene):
 
 
         #Dialogs.changeLoadingSplashScreenText(self.engine, splash, phrase + " \n " + _("Loading Stage..."))
-        stage = os.path.join("themes",themename,"stage.ini")
+        stage = os.path.join("themes",self.themeName,"stage.ini")
         self.stage = Stage.Stage(self, self.engine.resource.fileName(stage))
+
+        self.loadRockmeter()
 
         #Dialogs.changeLoadingSplashScreenText(self.engine, splash, phrase + " \n " + _("Loading Settings..."))
         self.loadSettings()
@@ -1158,11 +1161,11 @@ class GuitarScene(Scene):
         if not self.playingVocals:
             if self.song.hasMidiLyrics and self.midiLyricsEnabled > 0:
                 if self.midiLyricMode == 0:
-                    if not self.engine.loadImgDrawing(self, "lyricSheet", os.path.join("themes",themename,"lyricsheet.png")):
+                    if not self.engine.loadImgDrawing(self, "lyricSheet", os.path.join("themes",self.themeName,"lyricsheet.png")):
                         self.lyricSheet = None
                 else:
-                    if not self.engine.loadImgDrawing(self, "lyricSheet", os.path.join("themes",themename,"lyricsheet2.png")):
-                        if not self.engine.loadImgDrawing(self, "lyricSheet", os.path.join("themes",themename,"lyricsheet.png")):
+                    if not self.engine.loadImgDrawing(self, "lyricSheet", os.path.join("themes",self.themeName,"lyricsheet2.png")):
+                        if not self.engine.loadImgDrawing(self, "lyricSheet", os.path.join("themes",self.themeName,"lyricsheet.png")):
                             self.lyricSheet = None
             else:
                 self.lyricSheet = None
@@ -1172,7 +1175,7 @@ class GuitarScene(Scene):
 
         #brescorebackground.png
         self.breScoreBackground = None
-        if self.engine.loadImgDrawing(self, "breScoreBackground", os.path.join("themes",themename,"brescorebackground.png")):
+        if self.engine.loadImgDrawing(self, "breScoreBackground", os.path.join("themes",self.themeName,"brescorebackground.png")):
             self.breScoreBackgroundWFactor = (w * self.engine.theme.breScoreBackgroundScale) / self.breScoreBackground.width1()
         else:
             Log.debug("BRE score background image loading problem!")
@@ -1181,11 +1184,11 @@ class GuitarScene(Scene):
 
         #brescoreframe.png
         self.breScoreFrame = None
-        if self.engine.loadImgDrawing(self, "breScoreFrame", os.path.join("themes",themename,"brescoreframe.png")):
+        if self.engine.loadImgDrawing(self, "breScoreFrame", os.path.join("themes",self.themeName,"brescoreframe.png")):
             self.breScoreFrameWFactor = (w * self.engine.theme.breScoreFrameScale) / self.breScoreFrame.width1()
         else:
             #MFH - fallback on using soloframe.png if no brescoreframe.png is found
-            if self.engine.loadImgDrawing(self, "breScoreFrame", os.path.join("themes",themename,"soloframe.png")):
+            if self.engine.loadImgDrawing(self, "breScoreFrame", os.path.join("themes",self.themeName,"soloframe.png")):
                 self.breScoreFrameWFactor = (w * self.engine.theme.breScoreFrameScale) / self.breScoreFrame.width1()
             else:
                 self.breScoreFrame = None
@@ -1193,7 +1196,7 @@ class GuitarScene(Scene):
 
 
 
-        if self.engine.loadImgDrawing(self, "soloFrame", os.path.join("themes",themename,"soloframe.png")):
+        if self.engine.loadImgDrawing(self, "soloFrame", os.path.join("themes",self.themeName,"soloframe.png")):
             self.soloFrameWFactor = (w * self.engine.theme.soloFrameScale) / self.soloFrame.width1()
         else:
             self.soloFrame = None
@@ -1207,22 +1210,22 @@ class GuitarScene(Scene):
                 if not self.partImage:
                     break
                 if self.instruments[i].isDrum:
-                    if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("themes",themename,"drum.png")):
+                    if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("themes",self.themeName,"drum.png")):
                         if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("drum.png")):
                             self.counting = False
                             self.partImage = False
                 elif self.instruments[i].isBassGuitar:
-                    if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("themes",themename,"bass.png")):
+                    if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("themes",self.themeName,"bass.png")):
                         if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("bass.png")):
                             self.counting = False
                             self.partImage = False
                 elif self.instruments[i].isVocal:
-                    if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("themes",themename,"mic.png")):
+                    if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("themes",self.themeName,"mic.png")):
                         if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("mic.png")):
                             self.counting = False
                             self.partImage = False
                 else:
-                    if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("themes",themename,"guitar.png")):
+                    if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("themes",self.themeName,"guitar.png")):
                         if not self.engine.loadImgDrawing(self, "partLoad", os.path.join("guitar.png")):
                             self.counting = False
                             self.partImage = False
@@ -1236,14 +1239,14 @@ class GuitarScene(Scene):
             self.soloFrameWFactor = None
 
         #Pause Screen
-        self.engine.loadImgDrawing(self, "pauseScreen", os.path.join("themes",themename,"pause.png"))
-        if not self.engine.loadImgDrawing(self, "failScreen", os.path.join("themes",themename,"fail.png")):
-            self.engine.loadImgDrawing(self, "failScreen", os.path.join("themes",themename,"pause.png"))
+        self.engine.loadImgDrawing(self, "pauseScreen", os.path.join("themes",self.themeName,"pause.png"))
+        if not self.engine.loadImgDrawing(self, "failScreen", os.path.join("themes",self.themeName,"fail.png")):
+            self.engine.loadImgDrawing(self, "failScreen", os.path.join("themes",self.themeName,"pause.png"))
 
         #failMessage
-        self.engine.loadImgDrawing(self, "failMsg", os.path.join("themes",themename,"youfailed.png"))
+        self.engine.loadImgDrawing(self, "failMsg", os.path.join("themes",self.themeName,"youfailed.png"))
         #myfingershurt: youRockMessage
-        self.engine.loadImgDrawing(self, "rockMsg", os.path.join("themes",themename,"yourock.png"))
+        self.engine.loadImgDrawing(self, "rockMsg", os.path.join("themes",self.themeName,"yourock.png"))
 
         self.counterY = -0.1
         self.coOpPhrase = 0
@@ -1346,6 +1349,21 @@ class GuitarScene(Scene):
         splash = None
 
         #MFH - end of GuitarScene client initialization routine
+
+    def loadRockmeter(self):
+        if self.coOpType:
+            rm = os.path.join("themes", self.themeName, "rockmeter_coop.ini")
+        elif self.gamePlayers > 1:
+            rm = os.path.join("themes", self.themeName, "rockmeter_faceoff.ini")
+        else:
+            rm = os.path.join("themes", self.themeName, "rockmeter.ini")
+
+        if os.path.exists(os.path.join("..", "data", rm)):
+            rockmeter = self.engine.resource.fileName(rm)
+        else:
+            rockmeter = self.engine.resource.fileName(os.path.join("themes", self.themeName, "rockmeter.ini"))
+
+        self.rockmeter = Rockmeter.Rockmeter(self, rockmeter, self.coOpType)
 
 
     def pauseGame(self):
@@ -1928,7 +1946,7 @@ class GuitarScene(Scene):
         for player in self.playerList:
             player.reset()
         self.stage.reset()
-        self.stage.rockmeter.reset()
+        self.rockmeter.reset()
         self.enteredCode     = []
         self.jurgPlayer       = [False for i in self.playerList] #Jurgen hasn't played the restarted song =P
 
@@ -3021,16 +3039,7 @@ class GuitarScene(Scene):
                 self.scoring[num].addScore(scoreTemp)
 
     def render3D(self):
-        if self.stage.mode == 3:
-            if self.countdown <= 0:
-                if self.pause == True or self.failed == True:
-                    self.stage.vidPlayer.pause()
-                else:
-                    self.stage.vidPlayer.play()
-            else:
-                self.stage.vidPlayer.pause()
-
-        self.stage.render(self.visibility)
+        self.renderGuitar()
 
     def renderVocals(self):
         for i, vocalist in enumerate(self.instruments):
@@ -4303,7 +4312,21 @@ class GuitarScene(Scene):
                 if self.countdown > 0:
                     self.countdownOK = True
 
-            Scene.render(self, visibility, topMost) #MFH - I believe this eventually calls the renderGuitar function, which also involves two viewports... may not be easy to move this one...
+            if self.stage.mode == 3:
+                if self.countdown <= 0:
+                    if self.pause == True or self.failed == True:
+                        self.stage.vidPlayer.pause()
+                    else:
+                        self.stage.vidPlayer.play()
+                else:
+                    self.stage.vidPlayer.pause()
+
+            self.stage.render(self.visibility)
+
+
+            Scene.render(self, visibility, topMost)
+            self.stage.renderForground(visibility)
+            self.rockmeter.render(visibility)
 
             self.visibility = v = 1.0 - ((1 - visibility) ** 2)
 
