@@ -35,10 +35,12 @@ from OpenGL.GLU import *
 from fofix.core import Log
 from fofix.core import Version
 from fofix.core import Config
+from fofix.game import Song
 from fofix.core.Language import _
 from fofix.core.Image import drawImage
 from fofix.core.Task import Task
 from fofix.core.constants import *
+from fofix.core.utils import hexToColor, isTrue
 
 #Theme Constants.
 GUITARTYPES = [0, 1, 4]
@@ -68,35 +70,6 @@ def valign(value, default='middle'):
     except KeyError:
         Log.warn('Invalid vertical alignment value - defaulting to %s' % default)
         return valign(default)
-
-
-def hexToColor(color):
-    ''' Convert hexadecimal color string to tuple containing rgb or rgba values '''
-
-    if not (isinstance(color, str) or isinstance(color, unicode)):
-        raise TypeError('Invalid input type: {}'.format(type(color)))
-
-    elif color[0] != '#':
-        raise ValueError('Invalid color')
-
-    else:
-        color = color[1:]
-
-        if len(color) < 4:
-            colorData = [color[i]+color[i] for i in xrange(0, len(color))]
-        else:
-            colorData = [color[i:i+2] for i in xrange(0, len(color), 2)]
-
-        rgbColor = tuple([int(i, 16) / 255.0 for i in colorData])
-
-    return rgbColor
-
-def colorToHex(color):
-    if not isinstance(color, tuple):
-        raise TypeError
-
-    colorData = [ "%02x" % int(c * 255) for c in color]
-    return "#%s" % "".join(colorData)
 
 class Theme(Task):
 
@@ -963,8 +936,6 @@ class ThemeParts:
                         drawImage(dialog.img_ready, scale = (.5, -.5), coord = (wP*.5+w*x,hP*(.75*.46)+h*y))
             x += .24
 
-# Recursive imports with theme will fix later
-from fofix.game import Song
 class Setlist:
     def __init__(self, theme):
         self.theme = theme

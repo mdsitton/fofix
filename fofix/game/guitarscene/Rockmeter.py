@@ -39,7 +39,7 @@ from OpenGL.GL import *
 from fofix.core.LinedConfigParser import LinedConfigParser
 from fofix.core.Theme import halign, valign
 from fofix.core.Image import ImgDrawing
-from fofix.core.Theme import hexToColor
+from fofix.core.utils import hexToColor
 from fofix.core.Image import drawImage
 from fofix.core.constants import *
 from fofix.core import Version
