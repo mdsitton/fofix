@@ -29,7 +29,7 @@ import pygame
 from fofix.core.Language import _
 from fofix.core import Microphone  #stump
 from fofix.core import Config
-from fofix.game import Song
+from fofix.core import constants
 from fofix.core import VFS
 from fofix.core import Log
 
@@ -203,8 +203,8 @@ Config.define("controller", "mic_tap_sensitivity", int, 5,      text = _("Tap Se
 Config.define("controller", "mic_passthrough_volume", float, 0.0, text = _("Passthrough Volume"), options=dict((n / 100.0, n) for n in range(101)), tipText = _("Sets how loud you hear yourself singing.")) #stump
 
 Config.define("player", "name",          str,  "")
-Config.define("player", "difficulty",    int,  Song.MED_DIF)
-Config.define("player", "part",          int,  Song.GUITAR_PART)
+Config.define("player", "difficulty",    int,  constants.MED_DIF)
+Config.define("player", "part",          int,  constants.GUITAR_PART)
 Config.define("player", "neck",          str,  "")
 Config.define("player", "necktype",      str,  2, text = _("Neck Type"),     options = {0: _("Default Neck"), 1: _("Theme Neck"), 2: _("Specific Neck")})
 Config.define("player", "leftymode",     int,  0, text = _("Lefty Mode"),    options = {0: _("Off"), 1: _("On")})
@@ -959,6 +959,7 @@ class Player(object):
         self._upname = name
 
     def getDifficulty(self):
+        from fofix.game import Song
         return Song.difficulties.get(self._difficulty)
 
     def setDifficulty(self, difficulty):
@@ -970,6 +971,7 @@ class Player(object):
         return self._difficulty
 
     def getPart(self):
+        from fofix.game import Song
         #myfingershurt: this should not be reading from the ini file each time it wants to know the part.  Also add "self."
         if self.whichPart == -1:
             return "Party Mode"

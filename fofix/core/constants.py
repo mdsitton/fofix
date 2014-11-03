@@ -38,6 +38,24 @@ KEEP_ASPECT = 4
 SCREEN_WIDTH = 640.0
 SCREEN_HEIGHT = 480.0
 
+EXP_DIF     = 0
+HAR_DIF     = 1
+MED_DIF     = 2
+EAS_DIF     = 3
+
+GUITAR_TRACK             = 0
+RHYTHM_TRACK             = 1
+DRUM_TRACK               = 2
+
+GUITAR_PART             = 0
+RHYTHM_PART             = 1
+BASS_PART               = 2
+LEAD_PART               = 3
+DRUM_PART               = 4
+VOCAL_PART              = 5
+PRO_GUITAR_PART         = 6
+PRO_DRUM_PART           = 7
+
 #set of values that define as true when loading string values from a file
 def isTrue(value):
     return value in ["1", "true", "yes", "on"]

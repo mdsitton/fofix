@@ -41,15 +41,14 @@ from fofix.core import Audio
 from fofix.core import Config
 from fofix.core import Cerealizer
 from fofix.core import Version
+from fofix.core.constants import EXP_DIF, HAR_DIF, MED_DIF, EAS_DIF
+from fofix.core.constants import GUITAR_TRACK, RHYTHM_TRACK, DRUM_TRACK
+from fofix.core.constants import GUITAR_PART, RHYTHM_PART, BASS_PART, LEAD_PART, \
+                                 DRUM_PART, VOCAL_PART, PRO_GUITAR_PART, PRO_DRUM_PART
 from fofix.core import VFS
 
 DEFAULT_BPM = 120.0
 DEFAULT_LIBRARY         = "songs"
-
-EXP_DIF     = 0
-HAR_DIF     = 1
-MED_DIF     = 2
-EAS_DIF     = 3
 
 #MFH - special / global text-event tracks for the separated text-event list variable
 TK_SCRIPT = 0         #script.txt events
@@ -72,10 +71,6 @@ TK_UNUSED_TEXT = 4    #Unused / other text events
 #self.song.eventTracks[Song.TK_LYRICS]
 #self.song.eventTracks[Song.TK_UNUSED_TEXT]
 
-GUITAR_TRACK             = 0
-RHYTHM_TRACK             = 1
-DRUM_TRACK               = 2
-
 #MFH
 MIDI_TYPE_GH            = 0       #GH type MIDIs have starpower phrases marked with a long G8 note on that instrument's track
 MIDI_TYPE_RB            = 1       #RB type MIDIs have overdrive phrases marked with a long G#9 note on that instrument's track
@@ -85,15 +80,6 @@ MIDI_TYPE_WT            = 2       #WT type MIDIs have six notes and HOPOs marked
 EARLY_HIT_WINDOW_NONE   = 1       #GH1/RB1/RB2 = NONE
 EARLY_HIT_WINDOW_HALF   = 2       #GH2/GH3/GHA/GH80's = HALF
 EARLY_HIT_WINDOW_FULL   = 3       #FoF = FULL
-
-GUITAR_PART             = 0
-RHYTHM_PART             = 1
-BASS_PART               = 2
-LEAD_PART               = 3
-DRUM_PART               = 4
-VOCAL_PART              = 5
-PRO_GUITAR_PART         = 6
-PRO_DRUM_PART           = 7
 
 PART_SORT               = [0,2,3,1,6,4,7,5] # these put Lead before Rhythm in menus.
                                             # group by instrument type
