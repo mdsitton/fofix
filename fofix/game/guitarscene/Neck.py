@@ -358,140 +358,6 @@ class Neck:
     def project(self, beat):
         return 0.125 * beat / self.beatsPerUnit    # glorandwarf: was 0.12
 
-    def renderIncomingNeck(self, visibility, song, pos, time, neckTexture):   #MFH - attempt to "scroll" an incoming guitar solo neck towards the player
-        if not song:
-            return
-        if not song.readyToGo:
-            return
-
-        l = self.boardLength
-        z = ((time - pos) / self.currentPeriod) / self.beatsPerUnit
-
-        glEnable(GL_TEXTURE_2D)
-
-        self.board_scroll_vtx[0][2] = self.board_scroll_vtx[1][2] = z
-        self.board_scroll_vtx[2][2] = self.board_scroll_vtx[3][2] = z + 1
-        self.board_scroll_vtx[4][2] = self.board_scroll_vtx[5][2] = z + 2 + l * .7
-        self.board_scroll_vtx[6][2] = self.board_scroll_vtx[7][2] = z + 2 + l
-
-        if neckTexture:
-            neckTexture.texture.bind()
-
-        cmgl.drawArrays(GL_TRIANGLE_STRIP, vertices=self.board_scroll_vtx, colors=self.board_col, texcoords=self.board_tex_static)
-
-        glDisable(GL_TEXTURE_2D)
-
-    def renderIncomingSideBars(self, song, pos, time, sideBarImg):
-        if not song:
-            return
-        if not song.readyToGo:
-            return
-
-        l = self.boardLength
-        z = ((time - pos) / self.currentPeriod) / self.beatsPerUnit
-
-        glEnable(GL_TEXTURE_2D)
-
-        self.sidebars_scroll_vtx[0][2] = self.sidebars_scroll_vtx[1][2] = z
-        self.sidebars_scroll_vtx[2][2] = self.sidebars_scroll_vtx[3][2] = z + 1
-        self.sidebars_scroll_vtx[4][2] = self.sidebars_scroll_vtx[5][2] = z + 2 + l * .7
-        self.sidebars_scroll_vtx[6][2] = self.sidebars_scroll_vtx[7][2] = z + 2 + l
-
-        if sideBarImg:
-            sideBarImg.texture.bind()
-
-        cmgl.drawArrays(GL_TRIANGLE_STRIP, vertices=self.sidebars_scroll_vtx, colors=self.board_col, texcoords=self.board_tex_static)
-
-        glDisable(GL_TEXTURE_2D)
-
-    def renderIncomingNecks(self, visibility, song, pos):
-        if not song:
-            return
-        if not song.readyToGo:
-            return
-
-        boardWindowMin = pos - self.currentPeriod * 2
-        boardWindowMax = pos + self.currentPeriod * self.beatsPerBoard
-        track          = song.midiEventTrack[self.player]
-        sideBarImg     = None
-        neckImg        = None
-
-
-        if self.incomingNeckMode > 0:   #if enabled
-            if self.useMidiSoloMarkers:
-                for time, event in track.getEvents(boardWindowMin, boardWindowMax):
-                    if isinstance(event, Song.MarkerNote) and event.number == Song.starPowerMarkingNote:
-                        if event.endMarker:   #solo end
-                            if self.incomingNeckMode == 2 and self.guitarSolo:    #render both start and end incoming necks and only until the end of the guitar solo
-                                if self.soloNeck or self.soloSideBars:
-                                    if self.instrument.starPowerActive and self.oNeck and self.ovrneckoverlay == False:
-                                        neckImg = self.oNeck
-                                        alpha   = self.neckAlpha[4]
-                                    elif self.scoreMultiplier > 4 and self.bassGrooveNeck != None and self.bassGrooveNeckMode == 1:
-                                        neckImg = self.bassGrooveNeck
-                                        alpha   = self.neckAlpha[3]
-                                    elif self.fourMultiNeck and self.scoreMultiplier == 4 and self.fourxNeckMode == 1:
-                                        neckImg = self.fourMultiNeck
-                                        alpha   = self.neckAlpha[6]
-                                    elif self.neckDrawing:
-                                        neckImg = self.neckDrawing
-                                        alpha   = self.neckAlpha[1]
-                                    if neckImg:
-                                        self.renderIncomingNeck(visibility*alpha, song, pos, time, neckImg)
-
-
-                                if self.soloSideBars:
-                                    sideBarImg = self.sideBars
-                                    self.renderIncomingSideBars(song, pos, time, sideBarImg)
-
-                        else:    #solo start
-                            if not self.guitarSolo:   #only until guitar solo starts!
-                                if self.soloNeck:
-                                    neckImg     = self.soloNeck
-                                    alpha       = self.neckAlpha[2]
-                                    self.renderIncomingNeck(visibility*alpha, song, pos, time, neckImg)
-
-                                if self.soloSideBars:
-                                    sideBarImg  = self.soloSideBars
-                                    self.renderIncomingSideBars(song, pos, time, sideBarImg)
-
-                                if self.spcount2 != 0 and self.spcount < 1.2 and self.oNeck and self.soloNeck:
-                                    alpha = self.neckAlpha[4]
-                                    self.renderIncomingNeck(visibility*alpha, song, pos, time, neckImg)
-
-            elif self.markSolos == 1:   #fall back on text-based guitar solo marking track
-                for time, event in song.eventTracks[Song.TK_GUITAR_SOLOS].getEvents(boardWindowMin, boardWindowMax):
-                    if self.canGuitarSolo:
-                        if event.text.find("ON") >= 0:
-
-                            if not self.guitarSolo:   #only until guitar solo starts!
-                                if self.soloNeck:
-                                    neckImg = self.soloNeck
-                                    self.renderIncomingNeck(visibility, song, pos, time, neckImg)
-
-                                if self.soloSideBars:
-                                    sideBarImg  = self.soloSideBars
-                                    self.renderIncomingSideBars(song, pos, time, sideBarImg)
-
-                        elif self.incomingNeckMode == 2:    #render both start and end incoming necks
-                            if self.guitarSolo:   #only until the end of the guitar solo!
-                                if self.soloNeck or self.soloSideBars:
-                                    if self.instrument.starPowerActive and self.oNeck:
-                                        neckImg = self.oNeck
-                                    elif self.scoreMultiplier > 4 and self.bassGrooveNeck != None and self.bassGrooveNeckMode == 1:
-                                        neckImg = self.bassGrooveNeck
-                                    elif self.fourMultiNeck and self.scoreMultiplier == 4 and self.fourxNeckMode == 1:
-                                        neckImg = self.fourMultiNeck
-                                    elif self.neckDrawing:
-                                        neckImg = self.neckDrawing
-                                    if neckImg:
-                                        self.renderIncomingNeck(visibility, song, pos, time, neckImg)
-
-                                if self.soloSideBars:
-                                    sideBarImg  = self.soloSideBars
-                                    self.renderIncomingSideBars(song, pos, time, sideBarImg)
-
-
     def renderNeckMethod(self, visibility, offset, neck, alpha = False): #blazingamer: New neck rendering method
 
         v = visibility
@@ -676,94 +542,19 @@ class Neck:
         l = self.boardLength
 
         self.currentPeriod = self.instrument.neckSpeed
+        offset       = (pos - self.lastBpmChange) / self.currentPeriod + self.baseBeat
 
-        if self.isFailing == True:
-            if self.failcount <= 1 and self.failcount2 == False:
-                self.failcount += .05
-            elif self.failcount >= 1 and self.failcount2 == False:
-                self.failcount = 1
-                self.failcount2 = True
+        #basically sets the scrolling of the necks
+        self.board_tex[0][1] = self.board_tex[1][1] = self.project(offset - 2 * self.beatsPerUnit)
+        self.board_tex[2][1] = self.board_tex[3][1] = self.project(offset - 1 * self.beatsPerUnit)
+        self.board_tex[4][1] = self.board_tex[5][1] = self.project(offset + l * self.beatsPerUnit * .7)
+        self.board_tex[6][1] = self.board_tex[7][1] = self.project(offset + l * self.beatsPerUnit)
 
-            if self.failcount >= 0 and self.failcount2 == True:
-                self.failcount -= .05
-            elif self.failcount <= 0 and self.failcount2 == True:
-                self.failcount = 0
-                self.failcount2 = False
-        if self.isFailing == False and self.failcount > 0:
-            self.failcount -= .05
-            self.failcount2 = False
-        if self.instrument.starPowerActive == True:
-            if self.spcount < 1.2:
-                self.spcount += .05
-                self.spcount2 = 1
-            elif self.spcount >=1.2:
-                self.spcount = 1.2
-                self.spcount2 = 0
-        else:
-            if self.spcount > 0:
-                self.spcount -= .05
-                self.spcount2 = 2
-            elif self.spcount <=0:
-                self.spcount = 0
-                self.spcount2 = 0
-
-        if self.scoreMultiplier > 4 and self.bgcount < 1:
-            self.bgcount += .1
-            if self.bgcount > 1:
-                self.bgcount = 1
-        if self.scoreMultiplier < 4 and self.bgcount > 0:
-            self.bgcount -= .1
-            if self.bgcount < 0:
-                self.bgcount = 0
-
-        if self.scoreMultiplier == 4 and self.fourXcount < 1:
-            self.fourXcount += .1
-            if self.fourXcount > 1:
-                self.fourXcount = 1
-        if not self.scoreMultiplier == 4 and self.fourXcount > 0:
-            self.fourXcount -= .1
-            if self.fourXcount < 0:
-                self.fourXcount = 0
-
-        if not (self.bpm_halfbeat and self.bpm_beat and self.bpm_measure):
-            self.bpmLinesDisabled = True
-        else:
-            self.bpmLinesDisabled = False
-
-        if not (self.instrument.coOpFailed and not self.instrument.coOpRestart):
-
-            offset       = (pos - self.lastBpmChange) / self.currentPeriod + self.baseBeat
-
-            #basically sets the scrolling of the necks
-            self.board_tex[0][1] = self.board_tex[1][1] = self.project(offset - 2 * self.beatsPerUnit)
-            self.board_tex[2][1] = self.board_tex[3][1] = self.project(offset - 1 * self.beatsPerUnit)
-            self.board_tex[4][1] = self.board_tex[5][1] = self.project(offset + l * self.beatsPerUnit * .7)
-            self.board_tex[6][1] = self.board_tex[7][1] = self.project(offset + l * self.beatsPerUnit)
-
-            if self.ocount < 1:
-                self.ocount += .1
-            else:
-                self.ocount = 1
-
-            #used for fail flashing.
-            if self.isFailing:
-                for i in range(2,6):
-                    self.board_col_flash[i][3] = self.failcount
-
-            self.vis = visibility
-            if self.doNecksRender == True:
-                self.renderNeck(visibility, song, pos)
-            self.renderIncomingNecks(visibility, song, pos) #MFH
-            if self.centerLines or self.oCenterLines or self.oFlash:
-                self.drawTrack(self.ocount, song, pos)
-            if not self.bpmLinesDisabled:
-                self.drawBPM(visibility, song, pos)
-            if self.sideBars:
-                if self.isFailing and self.failSideBars:
-                    self.drawSideBars(visibility, song, pos)
-                    self.drawSideBars(self.failcount, song, pos)
-                else:
-                    self.drawSideBars(visibility, song, pos)
-
-        if self.overdriveFlashCount < self.overdriveFlashCounts and self.oFlash:
-            self.overdriveFlashCount = self.overdriveFlashCount + 1
+        self.vis = visibility
+        if self.doNecksRender == True:
+            self.renderNeck(visibility, song, pos)
+        if self.centerLines:
+            self.drawTrack(self.ocount, song, pos)
+        self.drawBPM(visibility, song, pos)
+        if self.sideBars:
+            self.drawSideBars(visibility, song, pos)

@@ -27,7 +27,6 @@ import importlib
 sceneInfo = {
    "SongChoosingScene": "fofix.game.SongChoosingScene",
    "GuitarScene": "fofix.game.guitarscene",
-   "GameResultsScene": "fofix.game.GameResultsScene",
 }
 scenes = sceneInfo.values()
 
