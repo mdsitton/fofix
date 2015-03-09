@@ -30,39 +30,19 @@ from fofix.core import SceneFactory
 STARTUP_SCENE = "SongChoosingScene"
 
 class World:
-    def __init__(self, engine, players, maxplayers = None, gameMode = 0, multiMode = 0, allowGuitar = True, allowDrum = True, allowMic = False, tutorial = False):
+    def __init__(self, engine, allowGuitar = True, allowDrum = True, ):
         self.engine       = engine
         self.players      = []
-        self.minPlayers   = players
-        self.maxPlayers   = maxplayers or players
-        self.gameMode     = gameMode  #Quickplay, Practice, Career
-        self.multiMode    = multiMode #Face-Off, Pro FO, Party, Co-Op, RB Co-Op, GH Co-Op, Battle
+        self.minPlayers   = 1
+        self.maxPlayers   = 1
         self.allowGuitar  = allowGuitar
         self.allowDrum    = allowDrum
-        self.allowMic     = allowMic
-        self.tutorial     = tutorial
         self.scene        = None
         self.sceneName    = ""
         self.songQueue    = SongQueue()
         self.playingQueue = False
         self.done         = False
-        self.setGameName()
-
-    def setGameName(self):
-        if self.minPlayers > 1:
-            if self.gameMode == 3:
-                self.gameName = _("FoFiX Co-Op Mode")
-            elif self.gameMode == 4:
-                self.gameName = _("RB Co-Op Mode")
-            elif self.gameMode == 5:
-                self.gameName = _("GH Co-Op Mode")
-        else:
-            if self.gameMode == 0:
-                self.gameName = _("Quickplay")
-            elif self.gameMode == 1:
-                self.gameName = _("Practice")
-            elif self.gameMode == 2:
-                self.gameName = _("Career Mode")
+        self.gameName = _("Quickplay")
 
     def finishGame(self):
         if self.done:
@@ -101,7 +81,6 @@ class World:
         player.controlType = self.engine.input.controls.type[player.controller]
         player.keyList = Player.playerkeys[playerNum]
         player.configController()
-        player.practiceMode = (self.gameMode == 1)
         self.players.append(player)
         self.songQueue.parts.append(player.part.id)
         self.songQueue.diffs.append(player.getDifficultyInt())

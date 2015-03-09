@@ -94,9 +94,7 @@ if defaultTheme is None:
 #myfingershurt: default theme must be an existing one!
 Config.define("coffee", "themename",           str,   defaultTheme,      text = _("Theme"),                options = dict([(str(themes[n]),themes[n]) for n in range(0, i)]), tipText = _("Sets the overall graphical feel of the game. You can find and download many more at fretsonfire.net"))
 
-##Alarian: End Get unlimited themes by foldername
 Player.loadControls()
-
 
 
 class FullScreenSwitcher(KeyListener):
@@ -126,24 +124,7 @@ class FullScreenSwitcher(KeyListener):
         if key == pygame.K_LALT:
             self.altStatus = False
 
-class SystemEventHandler(SystemEventListener):
-    """
-    A system event listener that takes care of restarting the game when needed
-    and reacting to screen resize events.
-    """
-    def __init__(self, engine):
-        self.engine = engine
-
-    def screenResized(self, size):
-        self.engine.resizeScreen(size[0], size[1])
-
-    def restartRequested(self):
-        self.engine.restart()
-
-    def quit(self):
-        self.engine.quit()
-
-class GameEngine(object):
+class GameEngine(SystemEventListener):
     """The main game engine."""
     def __init__(self, config = None):
 
@@ -198,7 +179,7 @@ class GameEngine(object):
         self.resumeTask = self.task.resumeTask
 
         self.title             = self.versionString
-        self.restartRequested  = False
+        self.restartRequest  = False
 
         # evilynux - Check if theme icon exists first, then fallback on FoFiX icon.
         themename = self.config.get("coffee", "themename")
@@ -211,17 +192,12 @@ class GameEngine(object):
             icon = fofixicon
 
         self.video             = Video(self.title, icon)
-        if self.config.get("video", "disable_screensaver"):
-            self.video.disableScreensaver()
 
         self.audio             = Audio()
         self.fpsEstimate       = 0
-        self.priority          = self.config.get("engine", "highpriority")
         self.show_fps          = self.config.get("video", "show_fps")
         self.advSettings       = self.config.get("game", "adv_settings")
         self.restartRequired   = False
-        self.quicksetRestart   = False
-        self.quicksetPerf      = self.config.get("quickset", "performance")
         self.scrollRate        = self.config.get("game", "scroll_rate")
         self.scrollDelay       = self.config.get("game", "scroll_delay")
 
@@ -231,11 +207,6 @@ class GameEngine(object):
         stereo       = self.config.get("audio", "stereo")
         bufferSize   = self.config.get("audio", "buffersize")
         self.audio.open(frequency = frequency, bits = bits, stereo = stereo, bufferSize = bufferSize)
-
-        self.cmdPlay           = 0
-        self.cmdMode           = None
-        self.cmdDiff           = None
-        self.cmdPart           = None
 
         self.gameStarted       = False
         self.world             = None
@@ -259,27 +230,13 @@ class GameEngine(object):
             self.config.set("video", "fullscreen", False)
             self.config.set("video", "resolution", "800x600")
 
-        # Enable the high priority timer if configured
-        if self.priority:
-            Log.debug("Enabling high priority timer.")
-            self.fps = 0 # High priority
-
-        # evilynux - This was generating an error on the first pass (at least under
-        #            GNU/Linux) as the Viewport was not set yet.
-        try:
-            viewport = glGetIntegerv(GL_VIEWPORT)
-        except:
-            viewport = [0, 0, width, height]
-        h = viewport[3] - viewport[1]
-        w = viewport[2] - viewport[0]
-        geometry = (0, 0, w, h)
+        geometry = (0, 0, width, height)
         self.svg = SvgContext(geometry)
-        glViewport(int(viewport[0]), int(viewport[1]), int(viewport[2]), int(viewport[3]))
 
         self.startupMessages   = self.video.error
         self.input     = Input()
         self.view      = View(self, geometry)
-        self.resizeScreen(w, h)
+        self.screenResized((width, height))
 
         self.resource  = Resource(Version.dataPath())
         self.mainloop  = self.loading
@@ -298,74 +255,12 @@ class GameEngine(object):
 
         self.data = Data(self.resource, self.svg)
 
-        ##MFH: Animated stage folder selection option
-        #<themename>\Stages still contains the backgrounds for when stage rotation is off, and practice.png
-        #subfolders under Stages\ will each be treated as a separate animated stage set
+        self.theme = Theme(themepath, themename)
 
-        self.stageFolders = []
-        currentTheme = themename
+        #self.task.addTask(self.theme)
 
-        stagespath = os.path.join(Version.dataPath(), "themes", currentTheme, "backgrounds")
-        themepath  = os.path.join(Version.dataPath(), "themes", currentTheme)
-        if os.path.exists(stagespath):
-            self.stageFolders = []
-            allFolders = os.listdir(stagespath)   #this also includes all the stage files - so check to see if there is at least one .png file inside each folder to be sure it's an animated stage folder
-            for name in allFolders:
-                aniStageFolderListing = []
-                thisIsAnAnimatedStageFolder = False
-                try:
-                    aniStageFolderListing = os.listdir(os.path.join(stagespath,name))
-                except Exception:
-                    thisIsAnAnimatedStageFolder = False
-                for aniFile in aniStageFolderListing:
-                    if os.path.splitext(aniFile)[1] == ".png" or os.path.splitext(aniFile)[1] ==  ".jpg" or os.path.splitext(aniFile)[1] == ".jpeg":  #we've found at least one .png file here, chances are this is a valid animated stage folder
-                        thisIsAnAnimatedStageFolder = True
-                if thisIsAnAnimatedStageFolder:
-                    self.stageFolders.append(name)
-
-
-            i = len(self.stageFolders)
-            if i > 0: #only set default to first animated subfolder if one exists - otherwise use Normal!
-                defaultAniStage = str(self.stageFolders[0])
-            else:
-                defaultAniStage = "Normal"
-            Log.debug("Default animated stage for " + currentTheme + " theme = " + defaultAniStage)
-            aniStageOptions = dict([(str(self.stageFolders[n]),self.stageFolders[n]) for n in range(0, i)])
-            aniStageOptions.update({"Normal":_("Slideshow")})
-            if i > 1:   #only add Random setting if more than one animated stage exists
-                aniStageOptions.update({"Random":_("Random")})
-            Config.define("game", "animated_stage_folder", str, defaultAniStage, text = _("Animated Stage"), options = aniStageOptions )
-
-            #MFH: here, need to track and check a new ini entry for last theme - so when theme changes we can re-default animated stage to first found
-            lastTheme = self.config.get("game","last_theme")
-            if lastTheme == "" or lastTheme != currentTheme:   #MFH - no last theme, and theme just changed:
-                self.config.set("game","animated_stage_folder",defaultAniStage)   #force defaultAniStage
-            self.config.set("game","last_theme",currentTheme)
-
-            selectedAnimatedStage = self.config.get("game", "animated_stage_folder")
-            if selectedAnimatedStage != "Normal" and selectedAnimatedStage != "Random":
-                if not os.path.exists(os.path.join(stagespath,selectedAnimatedStage)):
-                    Log.warn("Selected animated stage folder " + selectedAnimatedStage + " does not exist, forcing Normal.")
-                    self.config.set("game","animated_stage_folder","Normal") #MFH: force "Standard" currently selected animated stage folder is invalid
-        else:
-            Config.define("game", "animated_stage_folder", str, "None", text = _("Animated Stage"), options = ["None",_("None")])
-            Log.warn("No stages\ folder found, forcing None setting for Animated Stage.")
-            self.config.set("game","animated_stage_folder", "None") #MFH: force "None" when Stages folder can't be found
-
-
-
-        try:
-            fp, pathname, description = imp.find_module("CustomTheme",[themepath])
-            theme = imp.load_module("CustomTheme", fp, pathname, description)
-            self.theme = theme.CustomTheme(themepath, themename)
-        except ImportError:
-            self.theme = Theme(themepath, themename)
-
-        self.task.addTask(self.theme)
-
-
-        self.input.addKeyListener(FullScreenSwitcher(self), priority = True)
-        self.input.addSystemEventListener(SystemEventHandler(self))
+        self.input.addKeyListener(FullScreenSwitcher(self))
+        self.input.addSystemEventListener(self)
 
         self.debugLayer         = None
         self.startupLayer       = None
@@ -378,9 +273,8 @@ class GameEngine(object):
     # evilynux - This stops the crowd cheers if they're still playing (issue 317).
     def quit(self):
         # evilynux - self.audio.close() crashes when we attempt to restart
-        if not self.restartRequested:
+        if not self.restartRequest:
             self.audio.close()
-        Player.savePlayers()
         for taskData in list(self.task.tasks):
             self.task.removeTask(taskData['task'])
         self.running = False
@@ -422,26 +316,29 @@ class GameEngine(object):
         self.config.set("video", "fullscreen", self.video.fullscreen)
         return True
 
-    def restart(self):
+    def restartRequested(self):
         """Restart the game."""
-        if not self.restartRequested:
-            self.restartRequested = True
+        self.quit()
+        
+    def restart(self):
+        if not self.restartRequest:
+            self.restartRequest = True
             self.input.broadcastSystemEvent("restartRequested")
-        else:
-            self.quit()
 
-    def resizeScreen(self, width, height):
+    def screenResized(self, size):
         """
         Resize the game screen.
 
-        @param width:   New width in pixels
-        @param height:  New height in pixels
+        @param size:   New width, heiht in pixels
         """
-        self.view.setGeometry((0, 0, width, height))
-        self.svg.setGeometry((0, 0, width, height))
 
-    def startWorld(self, players, maxplayers = None, gameMode = 0, multiMode = 0, allowGuitar = True, allowDrum = True, allowMic = False, tutorial = False):
-        self.world = World(self, players, maxplayers, gameMode, multiMode, allowGuitar, allowDrum, allowMic, tutorial)
+        geometry = (0, 0, size[0], size[1])
+
+        self.view.setGeometry(geometry)
+        self.svg.doSize(geometry)
+
+    def startWorld(self, players, maxplayers = None, allowGuitar = True, allowDrum = True):
+        self.world = World(self, allowGuitar, allowDrum)
 
     def finishGame(self):
         if not self.world:

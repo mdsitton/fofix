@@ -37,10 +37,13 @@ from fofix.core import cmgl
 # the dead SVG code.
 class SvgContext(object):
     def __init__(self, geometry):
+        self.doSize(geometry)
+        glMatrixMode(GL_MODELVIEW)
+
+    def doSize(self, geometry):
         self.geometry = geometry
         self.setGeometry(geometry)
         self.setProjection(geometry)
-        glMatrixMode(GL_MODELVIEW)
 
     def setGeometry(self, geometry = None):
         glViewport(geometry[0], geometry[1], geometry[2], geometry[3])

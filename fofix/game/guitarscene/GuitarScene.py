@@ -410,26 +410,12 @@ class GuitarScene(Scene):
 
         self.activeGameControls = self.engine.input.activeGameControls
 
-        for i,player in enumerate(self.playerList):
-            self.instruments[i].leftyMode   = False
-            self.instruments[i].twoChordMax = False
-            self.instruments[i].drumFlip    = False
-            if player.lefty > 0:
-                self.instruments[i].leftyMode = True
-            if player.drumflip > 0:
-                self.instruments[i].drumFlip = True
-            if player.twoChordMax > 0:
-                self.instruments[i].twoChordMax  = True
-
         self.keysList = []
         for i, player in enumerate(self.playerList):
             if self.instruments[i].isDrum:
                 self.keysList.append(player.drums)
             else:
                 self.keysList.append(player.keys)
-            if not self.instruments[i].twoChordMax:
-                if self.controls.twoChord[self.activeGameControls[i]] > 0:
-                    self.instruments[i].twoChordMax = True
 
         if self.song and self.song.readyToGo:
             #myfingershurt: ensure that after a pause or restart, the a/v sync delay is refreshed:
@@ -719,9 +705,6 @@ class GuitarScene(Scene):
         if self.instruments[num].isDrum:
             return True
 
-        #myfingershurt:
-
-        control = self.controls.keyReleased(key)
         #myfingershurt: this is where the lower-fret-release causes a held note to break:
         for i, keys in enumerate(self.keysList):
             if keys is None:

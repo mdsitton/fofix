@@ -161,11 +161,7 @@ CONTROLLER4DRUMS = [CONTROL4[DRUM1], CONTROL4[DRUM1A], CONTROL4[DRUM2], CONTROL4
 SCORE_MULTIPLIER = [0, 10, 20, 30]
 BASS_GROOVE_SCORE_MULTIPLIER = [0, 10, 20, 30, 40, 50]
 
-player0 = []
-player1 = []
-player2 = []
-player3 = []
-playerkeys = []
+playerkeys = [None] * 4
 
 # define configuration keys
 Config.define("controller", "name",          str, tipText = _("Name your controller."))
@@ -229,145 +225,24 @@ def _makePlayerIniName(name):
     '''Turn a player name into a virtual path to the appropriate ini.'''
     return '%s/%s.ini' % (playerpath, name)
 
-control0 = None
-control1 = None
-control2 = None
-control3 = None
-controlDict = {}
 controllerDict = {}
 playername = []
 playerpref = []
-playerstat = []
-
-# Load the player database and check that it is fully initialized.
-_SCHEMA_VERSION = 3
-_playerDB = VFS.openSqlite3('%s/%s' % (playerpath, 'FoFiX-players.cache'))
-_updateTables = 0
-try:
-    v = _playerDB.execute("SELECT `value` FROM `config` WHERE `key` = 'version'").fetchone()[0]
-    if int(v) != _SCHEMA_VERSION:
-        _updateTables = 2 #an old version. We don't want to just burn old tables.
-except:
-    _updateTables = 1 #no good table
-if _updateTables > 0: #needs to handle old versions eventually.
-    for tbl in _playerDB.execute("SELECT `name` FROM `sqlite_master` WHERE `type` = 'table'").fetchall():
-        _playerDB.execute('DROP TABLE `%s`' % tbl)
-    _playerDB.commit()
-    _playerDB.execute('VACUUM')
-    _playerDB.execute('CREATE TABLE `config` (`key` STRING UNIQUE, `value` STRING)')
-    _playerDB.execute('CREATE TABLE `players` (`name` STRING UNIQUE, `lefty` INT, `drumflip` INT, `autokick` INT, `assist` INT, `twochord` INT, `necktype` INT, `neck` STRING, \
-                   `part` INT, `difficulty` INT, `upname` STRING, `control` INT, `changed` INT, `loaded` INT)')
-    _playerDB.execute('CREATE TABLE `stats` (`song` STRING, `hash` STRING, `player` STRING)')
-    _playerDB.execute("INSERT INTO `config` (`key`, `value`) VALUES (?, ?)", ('version', _SCHEMA_VERSION))
-    _playerDB.commit()
-
-def resetStats(player = None):
-    if player == None:
-        _playerDB.execute('UPDATE `stats` SET `hit` = 0, `notes` = 0, `sc1` = 0, `sc2` = 0, `sc3` = 0, `sc4` = 0, `sc5` = 0, `ha1` = 0, `ha2` = 0, `ha3` = 0, `ha4` = 0, `ha5` = 0')
-    else:
-        _playerDB.execute('UPDATE `stats` SET `hit` = 0, `notes` = 0, `sc1` = 0, `sc2` = 0, `sc3` = 0, `sc4` = 0, `sc5` = 0, `ha1` = 0, `ha2` = 0, `ha3` = 0, `ha4` = 0, `ha5` = 0 WHERE `name` = ?', [player])
-    _playerDB.commit()
 
 def loadPlayers():
-    global playername, playerpref, playerstat
+    global playername, playerpref
     playername = []
     playerpref = []
-    playerstat = []
-    allplayers = VFS.listdir(playerpath)
-    for name in allplayers:
-        if name == "default.ini":
-            continue
-        if name.lower().endswith(".ini") and len(name) > 4:
-            playername.append(name[0:len(name)-4])
-            pref = _playerDB.execute('SELECT * FROM `players` WHERE `name` = ?', [playername[-1]]).fetchone()
-            try:
-                if len(pref) == 14:
-                    playerpref.append((pref[1], pref[2], pref[3], pref[4], pref[5], pref[6], pref[7], pref[8], pref[9], pref[10]))
-            except TypeError:
-                try:
-                    c = Config.load(VFS.resolveRead(_makePlayerIniName(name[:-4])), type = 2)
-                    lefty  = c.get("player","leftymode")
-                    drumf  = c.get("player","drumflip")
-                    autok  = c.get("player","auto_kick")
-                    assist = c.get("player","assist_mode")
-                    twoch  = c.get("player","two_chord_max")
-                    neck   = c.get("player","neck")
-                    neckt  = c.get("player","necktype")
-                    part   = c.get("player","part")
-                    diff   = c.get("player","difficulty")
-                    upname = c.get("player","name")
-                    control= c.get("player","controller")
-                    del c
-                    _playerDB.execute('INSERT INTO `players` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1)', [playername[-1], lefty, drumf, autok, assist, twoch, neckt, neck, part, diff, upname, control])
-                    playerpref.append((lefty, drumf, autok, assist, twoch, neckt, neck, part, diff, upname))
-                except IOError:
-                    _playerDB.execute('INSERT INTO `players` VALUES (?, 0, 0, 0, 0, 0, 0, ``, 0, 2, ``, 0, 0, 1)', [playername[-1]])
-                    playerpref.append((0, 0, 0, 0, 0, 0, '', 0, 2, '', 0))
-            _playerDB.execute('UPDATE `players` SET `loaded` = 1 WHERE `name` = ?', [playername[-1]])
-            _playerDB.commit()
+
+    playername.append("player-def")
+    #u'2', u'', 0, 2, u''
+    #neckt, neck, part, diff, upname
+    part   = 0
+    diff   = 2
+    upname = u'player-def'
+    playerpref.append([part, diff, upname])
+
     return 1
-
-def savePlayers():
-    for pref in _playerDB.execute('SELECT * FROM `players` WHERE `changed` = 1').fetchall():
-        try:
-            c = Config.load(VFS.resolveWrite(_makePlayerIniName(str(pref[0]))), type = 2)
-            c.set("player","leftymode",int(pref[1]))
-            c.set("player","drumflip",int(pref[2]))
-            c.set("player","auto_kick",int(pref[3]))
-            c.set("player","assist_mode",int(pref[4]))
-            c.set("player","two_chord_max",int(pref[5]))
-            c.set("player","necktype",int(pref[6]))
-            c.set("player","neck",str(pref[7]))
-            c.set("player","part",int(pref[8]))
-            c.set("player","difficulty",int(pref[9]))
-            c.set("player","name",str(pref[10]))
-            c.set("player","controller",int(pref[11]))
-            del c
-            _playerDB.execute('UPDATE `players` SET `changed` = 0 WHERE `name` = ?', [pref[0]])
-        except:
-            c = VFS.open(_makePlayerIniName(str(pref[0])), "w")
-            c.close()
-            c = Config.load(VFS.resolveWrite(_makePlayerIniName(str(pref[0]))), type = 2)
-            c.set("player","leftymode",int(pref[1]))
-            c.set("player","drumflip",int(pref[2]))
-            c.set("player","auto_kick",int(pref[3]))
-            c.set("player","assist_mode",int(pref[4]))
-            c.set("player","two_chord_max",int(pref[5]))
-            c.set("player","necktype",int(pref[6]))
-            c.set("player","neck",str(pref[7]))
-            c.set("player","part",int(pref[8]))
-            c.set("player","difficulty",int(pref[9]))
-            c.set("player","name",str(pref[10]))
-            c.set("player","controller",int(pref[11]))
-            del c
-            _playerDB.execute('UPDATE `players` SET `changed` = 0 WHERE `name` = ?', [pref[0]])
-    _playerDB.execute('UPDATE `players` SET `loaded` = 0')
-    _playerDB.commit()
-
-def updatePlayer(player, pref):
-    a = _playerDB.execute('SELECT * FROM `players` WHERE `name` = ?', [player]).fetchone()
-    try:
-        a = a[0]
-    except:
-        a = None
-    if a is not None:
-        _playerDB.execute('UPDATE `players` SET `name` = ?, `lefty` = ?, `drumflip` = ?, `autokick` = ?, `assist` = ?, `twochord` = ?, `necktype` = ?, `neck` = ?, \
-                       `part` = 0, `difficulty` = 2, `upname` = ?, `control` = 0, `changed` = 1, `loaded` = 1 WHERE `name` = ?', pref + [player])
-        if player != pref[0]:
-            VFS.rename(_makePlayerIniName(player), _makePlayerIniName(pref[0]))
-    else:
-        _playerDB.execute('INSERT INTO `players` VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 2, ?, 0, 1, 1)', pref)
-    _playerDB.commit()
-    savePlayers()
-    loadPlayers()
-
-def deletePlayer(player):
-    _playerDB.execute('DELETE FROM `players` WHERE `name` = ?', [player])
-    VFS.unlink(_makePlayerIniName(player))
-    if VFS.isfile('%s/%s.png' % (playerpath, player)):
-        VFS.unlink('%s/%s.png' % (playerpath, player))
-    savePlayers()
-    loadPlayers()
 
 def loadControls():
     global controllerDict
@@ -381,50 +256,24 @@ def loadControls():
             controllers.append(name[0:len(name)-4])
 
     i = len(controllers)
+
     controllerDict = dict([(str(controllers[n]),controllers[n]) for n in range(0, i)])
     controllerDict["defaultg"] = _("Default Guitar")
     controllerDict["defaultd"] = _("Default Drum")
-    defMic = None
-    if Microphone.supported:
-        controllerDict["defaultm"] = _("Default Microphone")
-        defMic = "defaultm"
+
     tsControl    = _("Controller %d")
     tsControlTip = _("Select the controller for slot %d")
-    i = 1
-    Config.define("game", "control0",           str,   "defaultg", text = tsControl % 1,                options = controllerDict, tipText = tsControlTip % 1)
 
-    controllerDict[_("None")] = None
+    controllerDict["None"] = None
 
-    Config.define("game", "control1",           str,   "defaultd", text = tsControl % 2,                options = controllerDict, tipText = tsControlTip % 2)
-    Config.define("game", "control2",           str,   defMic,     text = tsControl % 3,                options = controllerDict, tipText = tsControlTip % 3)
-    Config.define("game", "control3",           str,   None,       text = tsControl % 4,                options = controllerDict, tipText = tsControlTip % 4)
-
-
-def deleteControl(control):
-    VFS.unlink(_makeControllerIniName(control))
-    defaultUsed = -1
-    for i in range(4):
-        get = Config.get("game", "control%d" % i)
-        if get == control:
-            if i == 0:
-                Config.set("game", "control%d" % i, "defaultg")
-                defaultUsed = 0
-            else:
-                Config.set("game", "control%d" % i, None)
-        if get == "defaultg" and defaultUsed > -1:
-            Config.set("game", "control%d" % i, None)
-    loadControls()
-
-def renameControl(control, newname):
-    VFS.rename(_makeControllerIniName(control), _makeControllerIniName(newname))
-    for i in range(4):
-        if Config.get("game", "control%d" % i) == control:
-            Config.set("game", "control%d" % i, newname)
-    loadControls()
+    Config.define("game", "control0", str, default="defaultg", options=controllerDict)
+    Config.define("game", "control1", str, default="defaultd", options=controllerDict)
+    Config.define("game", "control2", str, default=None,       options=controllerDict)
+    Config.define("game", "control3", str, default=None,       options=controllerDict)
 
 def pluginControls(activeControls):
-    global playerkeys, player0, player1, player2, player3
-    playerkeys = [None] * 4
+    global playerkeys
+
     for player, control in enumerate(activeControls):
         if control == 0:
             playerkeys[player] = CONTROL1
@@ -434,10 +283,6 @@ def pluginControls(activeControls):
             playerkeys[player] = CONTROL3
         elif control == 3:
             playerkeys[player] = CONTROL4
-    player0 = playerkeys[0]
-    player1 = playerkeys[1]
-    player2 = playerkeys[2]
-    player3 = playerkeys[3]
 
 class Controls:
     def __init__(self):
@@ -876,25 +721,15 @@ class Player(object):
 
         self.bassGrooveEnabled = False
         self.currentTheme = 1
+        self.pref = playerpref[self.number]
 
-        self.lefty       = _playerDB.execute('SELECT `lefty` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self.twoChordMax = _playerDB.execute('SELECT `twochord` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self.drumflip    = _playerDB.execute('SELECT `drumflip` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self.assistMode  = _playerDB.execute('SELECT `assist` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self.autoKick    = _playerDB.execute('SELECT `autokick` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self.neck        = _playerDB.execute('SELECT `neck` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self.neckType    = _playerDB.execute('SELECT `necktype` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self.whichPart   = _playerDB.execute('SELECT `part` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self._upname      = _playerDB.execute('SELECT `upname` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        self._difficulty  = _playerDB.execute('SELECT `difficulty` FROM `players` WHERE `name` = ?', [self.name]).fetchone()[0]
-        #MFH - need to store selected practice mode and start position here
-        self.practiceMode = False
-        self.practiceSpeed = 1.0
-        self.practiceSection = None
+        self.whichPart   = self.pref[0]
+        self._upname      = self.pref[2]
+        self._difficulty  = self.pref[1]
+
         self.startPos = 0.0
 
         self.hopoFreq = None
-
 
     def reset(self):
         self.twoChord      = 0
@@ -954,17 +789,15 @@ class Player(object):
             return self._upname
 
     def setName(self, name):
-        _playerDB.execute('UPDATE `players` SET `upname` = ?, `changed` = 1 WHERE `name` = ?', [name, self.name])
-        _playerDB.commit()
         self._upname = name
+        self.pref[2] = name
 
     def getDifficulty(self):
         from fofix.game import Song
         return Song.difficulties.get(self._difficulty)
 
     def setDifficulty(self, difficulty):
-        _playerDB.execute('UPDATE `players` SET `difficulty` = ?, `changed` = 1 WHERE `name` = ?', [difficulty.id, self.name])
-        _playerDB.commit()
+        self.pref[1] = difficulty.id
         self._difficulty = difficulty.id
 
     def getDifficultyInt(self):
@@ -987,8 +820,8 @@ class Player(object):
             self.whichPart = -2    #myfingershurt: also need to set self.part here to avoid unnecessary ini reads
         else:
             self.whichPart = part.id    #myfingershurt: also need to set self.part here to avoid unnecessary ini reads
-        _playerDB.execute('UPDATE `players` SET `part` = ?, `changed` = 1 WHERE `name` = ?', [self.whichPart, self.name])
-        _playerDB.commit()
+
+        self.pref[0] = self.whichPart
 
     difficulty = property(getDifficulty, setDifficulty)
     part = property(getPart, setPart)

@@ -55,7 +55,6 @@ class Guitar(Instrument):
         self.strings2       = 5
 
         self.debugMode = False
-        self.gameMode2p = self.engine.world.multiMode
         self.matchingNotes = []
 
         self.logClassInits = self.engine.config.get("game", "log_class_inits")

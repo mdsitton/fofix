@@ -100,9 +100,6 @@ class DebugLayer(Layer):
                             self.engine.input.systemListeners:
                 font.render(self.className(listener), (x + .1, y), scale = scale)
                 y += h
-            for listener in self.engine.input.priorityKeyListeners:
-                font.render(self.className(listener)+" (Priority)", (x + .1, y), scale = scale)
-                y += h
 
             x, y = (.05, .55)
             font.render("System:", (x, y), scale = scale)

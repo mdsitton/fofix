@@ -121,10 +121,8 @@ class Main():
 
         self.engine = GameEngine(self.config)
 
-        self.init_oneshot()
-
         self.videoLayer = False
-        self.restartRequested = False
+        self.restartRequest = False
 
     @staticmethod
     def load_config(configPath):
@@ -148,74 +146,31 @@ class Main():
 
         return config
 
-    def init_oneshot(self):
-        ''' Determine if oneshot mode is valid. '''
-        # I think this code can be moved elsewhere...
-        self.engine.cmdPlay = 0
-
-        # Check for a valid invocation of one-shot mode.
-        if self.playing is not None:
-            Log.debug('Validating song directory for one-shot mode.')
-
-            library = Config.get("setlist","base_library")
-            basefolder = os.path.join(Version.dataPath(),library,"songs",self.playing)
-
-
-            if not os.path.exists(os.path.join(basefolder, "song.ini")):
-
-                if not (os.path.exists(os.path.join(basefolder, "notes.mid")) or
-                        os.path.exists(os.path.join(basefolder, "notes-unedited.mid"))):
-
-                    if not (os.path.exists(os.path.join(basefolder, "song.ogg")) or
-                            os.path.exists(os.path.join(basefolder, "guitar.ogg"))):
-
-                        Log.warn("Song directory provided ('%s') is not a valid song directory. Starting up FoFiX in standard mode." % self.playing)
-                        self.engine.startupMessages.append(_("Song directory provided ('%s') is not a valid song directory. Starting up FoFiX in standard mode.") % self.playing)
-                        return
-
-            # Set up one-shot mode
-            Log.debug('Entering one-shot mode.')
-            Config.set("setlist", "selected_song", playing)
-
-            self.engine.cmdPlay = 1
-
-            if diff is not None:
-                self.engine.cmdDiff = int(diff)
-            if part is not None:
-                self.engine.cmdPart = int(part)
-
-            if players == 1:
-                self.engine.cmdMode = players, mode, 0
-            else:
-                self.engine.cmdMode = players, 0, mode
-
     def restart(self):
         Log.notice("Restarting.")
         self.engine.audio.close()
-        self.restartRequested = True
+        self.restartRequest = True
 
     def run(self):
 
         # Perhapse this could be implemented in a better way...
-        # Play the intro video if it is present, we have the capability, and
-        # we are not in one-shot mode.
-        if not self.engine.cmdPlay:
-            themename = Config.get("coffee", "themename")
-            vidSource = os.path.join(Version.dataPath(), 'themes', themename, 'menu', 'intro.ogv')
-            if os.path.isfile(vidSource):
-                try:
-                    vidPlayer = VideoLayer(self.engine, vidSource, cancellable=True)
-                except (IOError, VideoPlayerError):
-                    Log.error("Error loading intro video:")
-                else:
-                    vidPlayer.play()
-                    self.engine.view.pushLayer(vidPlayer)
-                    self.videoLayer = True
-                    self.engine.ticksAtStart = pygame.time.get_ticks()
-                    while not vidPlayer.finished:
-                        self.engine.run()
-                    self.engine.view.popLayer(vidPlayer)
-                    self.engine.view.pushLayer(MainMenu(self.engine))
+        # Play the intro video if it is present, we have the capability.
+        themename = Config.get("coffee", "themename")
+        vidSource = os.path.join(Version.dataPath(), 'themes', themename, 'menu', 'intro.ogv')
+        if os.path.isfile(vidSource):
+            try:
+                vidPlayer = VideoLayer(self.engine, vidSource, cancellable=True)
+            except (IOError, VideoPlayerError):
+                Log.error("Error loading intro video:")
+            else:
+                vidPlayer.play()
+                self.engine.view.pushLayer(vidPlayer)
+                self.videoLayer = True
+                self.engine.ticksAtStart = pygame.time.get_ticks()
+                while not vidPlayer.finished:
+                    self.engine.run()
+                self.engine.view.popLayer(vidPlayer)
+                self.engine.view.pushLayer(MainMenu(self.engine))
         if not self.videoLayer:
             self.engine.setStartupLayer(MainMenu(self.engine))
 
@@ -229,7 +184,7 @@ class Main():
             # don't reraise
 
         # Restart the program if the engine is asking that we do so.
-        if self.engine.restartRequested:
+        if self.engine.restartRequest:
             self.restart()
 
         # evilynux - MainMenu class already calls this - useless?
@@ -241,7 +196,7 @@ if __name__ == '__main__':
         while True:
             main = Main()
             main.run()
-            if not main.restartRequested:
+            if not main.restartRequest:
                 break
 
     except (KeyboardInterrupt, SystemExit):
