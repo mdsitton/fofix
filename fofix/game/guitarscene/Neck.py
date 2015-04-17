@@ -197,7 +197,7 @@ class Neck:
         if not song.readyToGo:
             return
 
-        track = song.track[self.player]
+        track = song.tempoEventTrack
 
         glEnable(GL_TEXTURE_2D)
 
@@ -229,7 +229,7 @@ class Neck:
 
         l = self.boardLength
 
-        self.currentPeriod = self.instrument.neckSpeed
+        self.currentPeriod  = 60000.0 / self.instrument.neckSpeed
         offset = (pos - self.lastBpmChange) / self.currentPeriod + self.baseBeat
 
         #basically sets the scrolling of the necks

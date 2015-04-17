@@ -889,7 +889,6 @@ class Note(Event):
         self.HCount2 = 0
         self.star = star
         self.finalStar = finalStar
-        self.noteBpm = 0.0
         #pro-mode
         self.lane = 0               #named lane to be vague so then it can be used in guitar and drums
 
@@ -924,7 +923,7 @@ class Bars(Event):
         self.soundPlayed = False
 
     def __repr__(self):
-        return "<#%d>" % self.barType
+        return "<BAR #%d>" % self.barType
 
 class Tempo(Event):
     def __init__(self, bpm):
@@ -947,7 +946,7 @@ class PictureEvent(Event):
         Event.__init__(self, length)
         self.fileName = fileName
 
-class Track:    #MFH - Changing Track class to a base class.  NoteTrack and TempoTrack will extend it.
+class Track(object):    #MFH - Changing Track class to a base class.  NoteTrack and TempoTrack will extend it.
     granularity = 50
 
     def __init__(self, engine):
@@ -1071,13 +1070,6 @@ class VocalTrack(Track):
         if isinstance(event, VocalNote) or isinstance(event, VocalPhrase):
             Track.addEvent(self, time, event)
 
-    def removeTempoEvents(self):
-        for time, event in self.allEvents:
-            if isinstance(event, Tempo):
-                self.allEvents.remove((time, event))
-                if self.logTempoEvents == 1:
-                    Log.debug("Tempo event removed from VocalTrack during cleanup: " + str(event.bpm) + "bpm")
-
     def markPhrases(self):
         phraseId = 0
         phraseTimes = []
@@ -1172,38 +1164,87 @@ class TempoTrack(Track):    #MFH - special Track type for tempo events
 
     #MFH - function to track current tempo in realtime based on time / position
     def getCurrentTempo(self, pos):   #MFH
-        if self.currentIndex:
-            tempEventHolder = self.getNextEvent()   #MFH - check if next BPM change is here yet
-            if tempEventHolder:
-                time, event = tempEventHolder
-                if pos >= time:
-                    self.currentIndex += 1
-                    self.currentBpm = event.bpm
+        tempEventHolder = self.getNextEvent()   #MFH - check if next BPM change is here yet
+        if tempEventHolder:
+            time, event = tempEventHolder
+            if pos >= time:
+                self.currentIndex += 1
+                self.currentBpm = event.bpm
         return self.currentBpm
 
     def getNextTempoChange(self, pos):  #MFH
-        if self.currentIndex:
-            return self.getNextEvent()
-        return None
-
-    def searchCurrentTempo(self, pos):    #MFH - will hunt through all tempo events to find it - intended for use during initializations only!
-        foundBpm = None
-        foundTime = None
-        for time, event in self.allEvents:
-            if not foundBpm or not foundTime:
-                foundBpm = event.bpm
-                foundTime = time
+        index = 0
+        event = None
+        while self.currentIndex <= self.maxIndex:
+            index += 1
+            event = self.getNextEvent(index)
+            if isinstance(event[1], Tempo):
+                break
             else:
-                #MFH - want to discard if the foundTime is before pos, but this event is after pos.
-                # -- also want to take newer BPM if time > foundTime >= pos
-                if time <= pos:   #MFH - first required condition.
-                    if time > foundTime:    #MFH - second required condition for sorting.
-                        foundBpm = event.bpm
-                        foundTime = time
-        if foundBpm:
-            return foundBpm
-        else:   #MFH - return default BPM if no events
-            return DEFAULT_BPM
+                event = None
+
+        return event
+
+    def markBars(self):
+        tempoTime = []
+        tempoBpm = []
+
+        #get all the bpm changes and their times
+        #MFH - TODO - count tempo events.  If 0, realize and log that this is a song with no tempo events - and go mark all 120BPM bars.
+        for time, event in self.allEvents:
+            if isinstance(event, Tempo):
+                tempoTime.append(time)
+                tempoBpm.append(event.bpm)
+                continue
+
+        #calculate and add the measures/beats/half-beats
+        passes = 0
+        limit = len(tempoTime)
+        time = tempoTime[0]
+        THnote = 256.0 #256th note
+        drawBar = True
+
+        for i in xrange(limit-1):
+            msTotal = tempoTime[i+1] - time
+            if msTotal == 0:
+                continue
+            tempbpm = tempoBpm[i]
+            nbars = (msTotal * (tempbpm / (240.0 / THnote) )) / 1000.0
+            inc = msTotal / nbars
+
+            while time < tempoTime[i+1]:
+                if drawBar == True:
+                    if (passes % (THnote / 1.0) == 0.0): #256/1
+                        event = Bars(2) #measure
+                        self.addEvent(time, event)
+                    elif (passes % (THnote / 4.0) == 0.0): #256/4
+                        event = Bars(1) #beat
+                        self.addEvent(time, event)
+                    elif (passes % (THnote / 8.0) == 0.0): #256/8
+                        event = Bars(0) #half-beat
+                        self.addEvent(time, event)
+
+                    passes = passes + 1
+
+                time = time + inc
+                drawBar = True
+
+            if time > tempoTime[i+1]:
+                time = time - inc
+                drawBar = False
+
+        #add the last measure/beat/half-beat
+        if time == tempoTime[i]:
+            if (passes % (THnote / 1.0) == 0.0): #256/1
+                event = Bars(2) #measure
+                self.addEvent(time, event)
+            elif (passes % (THnote / 4.0) == 0.0): #256/4
+                event = Bars(1) #beat
+                self.addEvent(time, event)
+            elif (passes % (THnote / 8.0) == 0.0): #256/8
+                event = Bars(0) #half-beat
+                self.addEvent(time, event)
+
 
 class NoteTrack(Track):   #MFH - special Track type for note events, with marking functions
     def __init__(self, engine):
@@ -1213,13 +1254,6 @@ class NoteTrack(Track):   #MFH - special Track type for note events, with markin
         self.hopoTick = engine.config.get("coffee", "hopo_frequency")
         self.songHopoFreq = engine.config.get("game", "song_hopo_freq")
         self.logTempoEvents = engine.config.get("log",   "log_tempo_events")
-
-    def removeTempoEvents(self):
-        for time, event in self.allEvents:
-            if isinstance(event, Tempo):
-                self.allEvents.remove((time, event))
-                if self.logTempoEvents == 1:
-                    Log.debug("Tempo event removed from NoteTrack during cleanup: " + str(event.bpm) + "bpm")
 
     def flipDrums(self):
         for time, event in self.allEvents:
@@ -1684,81 +1718,6 @@ class NoteTrack(Track):   #MFH - special Track type for note events, with markin
                     else:
                         note.tappable = 3
         self.marked = True
-
-    def markBars(self):
-        tempoTime = []
-        tempoBpm = []
-
-        #get all the bpm changes and their times
-
-        #MFH - TODO - count tempo events.  If 0, realize and log that this is a song with no tempo events - and go mark all 120BPM bars.
-        endBpm = None
-        endTime = None
-        for time, event in self.allEvents:
-            if isinstance(event, Tempo):
-                tempoTime.append(time)
-                tempoBpm.append(event.bpm)
-                endBpm = event.bpm
-                continue
-            if isinstance(event, Note):
-                endTime = time + event.length + 30000
-                continue
-
-        if endTime:
-            tempoTime.append(endTime)
-        if endBpm:
-            tempoBpm.append(endBpm)
-
-        #calculate and add the measures/beats/half-beats
-        passes = 0
-        limit = len(tempoTime)
-        time = tempoTime[0]
-        THnote = 256.0 #256th note
-        drawBar = True
-        i = 0
-        while i < (limit - 1):
-            msTotal = tempoTime[i+1] - time
-            if msTotal == 0:
-                i += 1
-                continue
-            tempbpm = tempoBpm[i]
-            nbars = (msTotal * (tempbpm / (240.0 / THnote) )) / 1000.0
-            inc = msTotal / nbars
-
-            while time < tempoTime[i+1]:
-                if drawBar == True:
-                    if (passes % (THnote / 1.0) == 0.0): #256/1
-                        event = Bars(2) #measure
-                        self.addEvent(time, event)
-                    elif (passes % (THnote / 4.0) == 0.0): #256/4
-                        event = Bars(1) #beat
-                        self.addEvent(time, event)
-                    elif (passes % (THnote / 8.0) == 0.0): #256/8
-                        event = Bars(0) #half-beat
-                        self.addEvent(time, event)
-
-                    passes = passes + 1
-
-                time = time + inc
-                drawBar = True
-
-            if time > tempoTime[i+1]:
-                time = time - inc
-                drawBar = False
-
-            i += 1
-
-        #add the last measure/beat/half-beat
-        if time == tempoTime[i]:
-            if (passes % (THnote / 1.0) == 0.0): #256/1
-                event = Bars(2) #measure
-                self.addEvent(time, event)
-            elif (passes % (THnote / 4.0) == 0.0): #256/4
-                event = Bars(1) #beat
-                self.addEvent(time, event)
-            elif (passes % (THnote / 8.0) == 0.0): #256/8
-                event = Bars(0) #half-beat
-                self.addEvent(time, event)
 
 
 class Song(object):
@@ -2400,7 +2359,6 @@ class MidiReader(midi.MidiOutStream):
         self.tempoMarkers.append((midi.MidiOutStream.abs_time(self), bpm))
         if not self.song.bpm:
             self.song.setBpm(bpm)
-        self.addEvent(None, Tempo(bpm))
         self.addTempoEvent(Tempo(bpm))  #MFH
 
     def sequence_name(self, text):

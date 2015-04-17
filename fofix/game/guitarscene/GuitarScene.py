@@ -140,6 +140,7 @@ class GuitarScene(Scene):
 
         self.camera.target    = (0.0, 1.0, 8.0)
         self.camera.origin    = (0.0, 2.0, -3.4)
+        self.songPos = 0.0
 
         self.pause = False
 
@@ -153,8 +154,6 @@ class GuitarScene(Scene):
         self.pluBase = 15
         self.minGain = 2
         self.pluGain = 7
-        self.minusRock = [self.minBase for i in self.playerList]
-        self.plusRock = [self.pluBase for i in self.playerList]
 
         #Dialogs.changeLoadingSplashScreenText(self.engine, splash, _("Loading Settings..."))
         self.loadSettings()
@@ -266,10 +265,10 @@ class GuitarScene(Scene):
             instrument.currentBpm = Song.DEFAULT_BPM
             instrument.setBPM(instrument.currentBpm)
 
+
+        self.song.tempoEventTrack.markBars()
         #akedrou - moved this to the part where it loads notes...
         for i in range(self.numOfPlayers):
-            #myfingershurt: preventing ever-thickening BPM lines after restarts
-            self.song.track[i].markBars()
             #MFH - should only be done the first time.
             if self.hopoStyle > 0 or self.song.info.hopo == "on":
                 if not self.instruments[i].isDrum:
@@ -339,12 +338,14 @@ class GuitarScene(Scene):
         Dialogs.hideLoadingSplashScreen(self.engine, splash)
         splash = None
 
+        self.engine.collectGarbage()
+
         #MFH - end of GuitarScene client initialization routine
 
     def pauseGame(self):
         if self.song and self.song.readyToGo:
-            self.song.pause()
             self.pausePos = self.getSongPosition()
+            self.song.pause()
             self.pause = True
             for instrument in self.instruments:
                 instrument.paused = True
@@ -368,12 +369,6 @@ class GuitarScene(Scene):
     def resumeSong(self):
         self.engine.view.popLayer(self.menu)
         self.resumeGame()
-
-    def lostFocus(self): #akedrou - catch to pause on lostFocus
-        if self.song and self.song.readyToGo:
-            if not self.pause and self.lostFocusPause == True:
-                self.engine.view.pushLayer(self.menu)
-                self.pauseGame()
 
     def setCamera(self):
         self.camera.target    = (0.0, 0.0, 4.0)
@@ -442,7 +437,6 @@ class GuitarScene(Scene):
         self.engine.world.finishGame()
 
     def changeSong(self):
-        prevMode = self.engine.world.gameMode
         if self.song:
             self.song.stop()
             self.song  = None
@@ -450,7 +444,6 @@ class GuitarScene(Scene):
         self.engine.view.setViewport(1,0)
         self.engine.view.popLayer(self.menu)
         self.freeResources()
-        self.engine.world.gameMode = prevMode
         self.engine.world.createScene("SongChoosingScene")
 
     def resetVariablesToDefaults(self):
@@ -460,26 +453,10 @@ class GuitarScene(Scene):
         self.countdown = float(self.countdownSeconds) * self.songBPS
         self.countdownOK = False
         self.drumStart = False  #faaa's drum sound mod restart
-        for instrument in self.instruments:
-            instrument.spEnabled = True
-            instrument.bigRockEndingMarkerSeen = False
         self.resumeCountdown = 0
         self.resumeCountdownSeconds = 0
         self.pausePos = 0
-        self.minusRock = [0.0 for i in self.playerList]
-        self.plusRock = [0.0 for i in self.playerList]
-        for instrument in self.instruments:
-            instrument.starPower = 0
-            instrument.coOpFailed = False
-            #volshebnyi - BRE variables reset
-            instrument.freestyleStart = 0
-            instrument.freestyleFirstHit = 0
-            instrument.freestyleLength = 0
-            instrument.freestyleBonusFret = 0
-            if instrument.isDrum:
-                instrument.drumFillsCount = 0
-                instrument.drumFillsHits = 0
-            instrument.freestyleLastFretHitTime = [0 for i in range(5)]
+        self.songPos = 0.0
 
         #MFH - reset global tempo variables
         self.currentBpm     = Song.DEFAULT_BPM
@@ -490,10 +467,8 @@ class GuitarScene(Scene):
 
         for player in self.playerList:
             player.reset()
-        self.jurgPlayer       = [False for i in self.playerList] #Jurgen hasn't played the restarted song =P
 
         for instrument in self.instruments:
-            instrument.scoreMultiplier = 1
             instrument.twoChord = 0
             instrument.hopoActive = 0
             instrument.wasLastNoteHopod = False
@@ -527,36 +502,6 @@ class GuitarScene(Scene):
             instrument.endPick(0) #akedrou: this is the position of the song, not a player number!
         self.song.stop()
 
-    def handleTempo(self, song, pos):
-        if not song:
-            return
-        if self.lastBpmChange > 0 and self.disableVBPM == True:   #MFH - only handle tempo once if the VBPM feature is off.
-            return
-        tempEventHolder = song.tempoEventTrack.getNextTempoChange(pos)
-        if tempEventHolder:
-            time, event = tempEventHolder
-            if ( (time < pos or self.lastBpmChange < 0) or (pos - time < self.currentPeriod or self.lastBpmChange < 0) ) and time > self.lastBpmChange:
-                self.baseBeat         += (time - self.lastBpmChange) / self.currentPeriod
-                self.targetBpm = event.bpm
-                song.tempoEventTrack.currentIndex += 1  #MFH = manually increase current event
-                self.lastBpmChange     = time
-
-        #adjust tempo gradually to meet new target:
-        if self.targetBpm != self.currentBpm:
-            diff = self.targetBpm - self.currentBpm
-            tempDiff = round( (diff * .03), 4)    #MFH - better to calculate this once and reuse the variable instead of recalculating every use
-            if tempDiff != 0:
-                self.currentBpm = self.currentBpm + tempDiff
-            else:
-                self.currentBpm = self.targetBpm
-
-            #recalculate all variables dependent on the tempo, apply to instrument objects - only if currentBpm has changed:
-            self.currentPeriod  = 60000.0 / self.currentBpm
-            for instrument in self.instruments:
-                instrument.setBPM(self.currentBpm)
-                instrument.lastBpmChange = self.lastBpmChange
-                instrument.baseBeat = self.baseBeat
-
     def doPick(self, num):
         if not self.song:
             return
@@ -582,30 +527,13 @@ class GuitarScene(Scene):
 
             self.notesHit[num] = True
 
-            isFirst = True
-            noteList = self.instruments[num].playedNotes
-            for tym, noat in noteList:
-                if noat.star and isFirst:
-                    self.instruments[num].isStarPhrase = True
-                isFirst = False
-
         else:
-            ApplyPenalty = True
-            if self.instruments[num].isDrum:
-                if self.instruments[num].drumFillWasJustActive:
-                    ApplyPenalty = False
-                    self.instruments[num].freestylePick(self.song, pos, self.controls)    #MFH - to allow late drum fill SP activation
-                    self.instruments[num].drumFillWasJustActive = False
-
-            if ApplyPenalty:
-                self.song.setInstrumentVolume(0.0, self.playerList[num].part)
-                self.instruments[num].setMultiplier(1)
-                
-                self.notesMissed[num] = True #QQstarS:Set [0] to [i]
+            self.song.setInstrumentVolume(0.0, self.playerList[num].part)
+            self.notesMissed[num] = True
 
     def keyPressed(self, key, unicode, control = None, pullOff = False):
         #RF style HOPO playing
-
+        
         #myfingershurt: drums :)
         for i in range(self.numOfPlayers):
             if self.instruments[i].isDrum and control in (self.instruments[i].keys):
@@ -658,35 +586,33 @@ class GuitarScene(Scene):
 
         activeList = [k for k in self.keysList[pressed] if self.controls.getState(k)]
 
-        for i in range(self.numOfPlayers): #akedrou- probably loopable...
-            if control in self.instruments[i].keys and numpressed[i] >= 1:
-                if self.instruments[i].hopoActive > 0 or (self.instruments[i].wasLastNoteHopod and self.instruments[i].hopoActive == 0):
-                    if not pullOff and (self.hopoStyle == 2 or self.hopoStyle == 3): #GH2 or GH2 Strict, don't allow lower-fret tapping while holding a higher fret
-                        activeKeyList = []
-                        LastHopoFretStillHeld = False
-                        HigherFretsHeld = False
-                        for p, k in enumerate(self.keysList[i]):
-                            if self.controls.getState(k):
-                                activeKeyList.append(k)
-                                if self.instruments[i].hopoLast == p or self.instruments[i].hopoLast-5 == p:
-                                    LastHopoFretStillHeld = True
-                                elif (p > self.instruments[i].hopoLast and p < 5) or (p > self.instruments[i].hopoLast and p > 4):
-                                    HigherFretsHeld = True
+        if control in self.instruments[i].keys and numpressed[i] >= 1:
+            if self.instruments[i].hopoActive > 0 or (self.instruments[i].wasLastNoteHopod and self.instruments[i].hopoActive == 0):
+                if not pullOff and (self.hopoStyle == 2 or self.hopoStyle == 3): #GH2 or GH2 Strict, don't allow lower-fret tapping while holding a higher fret
+                    activeKeyList = []
+                    LastHopoFretStillHeld = False
+                    HigherFretsHeld = False
+                    for p, k in enumerate(self.keysList[i]):
+                        if self.controls.getState(k):
+                            activeKeyList.append(k)
+                            if self.instruments[i].hopoLast == p or self.instruments[i].hopoLast-5 == p:
+                                LastHopoFretStillHeld = True
+                            elif (p > self.instruments[i].hopoLast and p < 5) or (p > self.instruments[i].hopoLast and p > 4):
+                                HigherFretsHeld = True
 
-                        if not(LastHopoFretStillHeld and not HigherFretsHeld):  #tapping a lower note should do nothing.
-                            hopo = True
-                            pressed = i
-                    else:   #GH2 Sloppy or RF-Mod
+                    if not(LastHopoFretStillHeld and not HigherFretsHeld):  #tapping a lower note should do nothing.
                         hopo = True
                         pressed = i
-                break
-
-        #MFH - this is where the marked little block above used to be - possibly causing false "late pick" detections from HOPOs...
+                else:   #GH2 Sloppy or RF-Mod
+                    hopo = True
+                    pressed = i
 
         if pressed >= 0:
             #myfingershurt:
-
-            self.handlePick(pressed, hopo = hopo, pullOff = pullOff)
+            if self.instruments[i].isDrum:
+                self.doPick(i)
+            else:
+                self.handlePick(pressed, hopo = hopo, pullOff = pullOff)
 
         if control in Player.starts:
             self.pauseGame()
@@ -714,7 +640,6 @@ class GuitarScene(Scene):
                         #myfingershurt: only end the pick if no notes are being held.
                     if (self.instruments[i].hit[note.number] == True and (control == self.keysList[i][note.number] or control == self.keysList[i][note.number+5])):
                         self.endPick(i)
-
         for i in range(self.numOfPlayers):
             if self.keysList[i] is None:
                 continue
@@ -734,136 +659,132 @@ class GuitarScene(Scene):
         if self.resumeCountdown > 0:    #MFH - conditions to completely ignore picks
             return
 
-        if guitar.isDrum:
-            self.doPick(num)
-        else:
+        if not self.song:
+            return
 
-            if not self.song:
+        pos = self.getSongPosition()
+
+        missedNotes = self.instruments[num].getMissedNotesMFH(self.song, pos, catchup = True)
+        if len(missedNotes) > 0:
+            self.processedFirstNoteYet = True
+            
+            self.instruments[num].hopoActive = 0
+            self.instruments[num].sameNoteHopoString = False
+            self.instruments[num].hopoProblemNoteNum = -1
+            self.instruments[num].wasLastNoteHopod = False
+            self.instruments[num].hopoLast = -1
+            self.notesMissed[num] = True #QQstarS:Set [0] to [i]
+
+            if hopo == True:
                 return
 
-            pos = self.getSongPosition()
+        #hopo fudge
+        hopoFudge = abs(abs(self.instruments[num].hopoActive) - pos)
 
-            missedNotes = self.instruments[num].getMissedNotesMFH(self.song, pos, catchup = True)
-            if len(missedNotes) > 0:
-                self.processedFirstNoteYet = True
-                
-                self.instruments[num].setMultiplier(1)
-                self.instruments[num].hopoActive = 0
-                self.instruments[num].sameNoteHopoString = False
-                self.instruments[num].hopoProblemNoteNum = -1
-                self.instruments[num].wasLastNoteHopod = False
-                self.instruments[num].hopoLast = -1
-                self.notesMissed[num] = True #QQstarS:Set [0] to [i]
+        activeKeyList = []
+        #myfingershurt: the following checks should be performed every time so GH2 Strict pull-offs can be detected properly.
+        LastHopoFretStillHeld = False
+        HigherFretsHeld = False
+        problemNoteStillHeld = False
 
-                if hopo == True:
-                    return
+        for n, k in enumerate(self.keysList[num]):
+            if self.controls.getState(k):
+                activeKeyList.append(k)
+                if self.instruments[num].hopoLast == n or self.instruments[num].hopoLast == n - 5:
+                    LastHopoFretStillHeld = True
+                elif (n > self.instruments[num].hopoLast and n < 5) or (n - 5 > self.instruments[num].hopoLast and n > 4):
+                    HigherFretsHeld = True
+                if self.instruments[num].hopoProblemNoteNum == n or self.instruments[num].hopoProblemNoteNum == n - 5:
+                    problemNoteStillHeld = True
 
-            #hopo fudge
-            hopoFudge = abs(abs(self.instruments[num].hopoActive) - pos)
-
-            activeKeyList = []
-            #myfingershurt: the following checks should be performed every time so GH2 Strict pull-offs can be detected properly.
-            LastHopoFretStillHeld = False
-            HigherFretsHeld = False
-            problemNoteStillHeld = False
-
-            for n, k in enumerate(self.keysList[num]):
-                if self.controls.getState(k):
-                    activeKeyList.append(k)
-                    if self.instruments[num].hopoLast == n or self.instruments[num].hopoLast == n - 5:
-                        LastHopoFretStillHeld = True
-                    elif (n > self.instruments[num].hopoLast and n < 5) or (n - 5 > self.instruments[num].hopoLast and n > 4):
-                        HigherFretsHeld = True
-                    if self.instruments[num].hopoProblemNoteNum == n or self.instruments[num].hopoProblemNoteNum == n - 5:
-                        problemNoteStillHeld = True
-
-            if not hopo and self.instruments[num].wasLastNoteHopod and not self.instruments[num].LastStrumWasChord and not self.instruments[num].sameNoteHopoString:
-                if LastHopoFretStillHeld == True and HigherFretsHeld == False:
-                    if self.instruments[num].wasLastNoteHopod and hopoFudge >= 0 and hopoFudge < self.instruments[num].lateMargin:
-                        if self.instruments[num].hopoActive < 0:
-                            self.instruments[num].wasLastNoteHopod = False
-                            return
-                        elif self.instruments[num].hopoActive > 0:  #make sure it's hopoActive!
-                            self.instruments[num].wasLastNoteHopod = False
-                            return
-
-            #MFH - here, just check to see if we can release the expectation for an acceptable overstrum:
-            if self.instruments[num].sameNoteHopoString and not problemNoteStillHeld:
-                self.instruments[num].sameNoteHopoString = False
-                self.instruments[num].hopoProblemNoteNum = -1
-
-            if self.instruments[num].startPick3(self.song, pos, self.controls, hopo):
-                self.processedFirstNoteYet = True
-                self.song.setInstrumentVolume(1.0, self.playerList[num].part)
-
-                isFirst = True
-                noteList = self.instruments[num].playedNotes
-                for tym, noat in noteList:
-                    if noat.star and isFirst:
-                        self.instruments[num].isStarPhrase = True
-                    isFirst = False
-
-                self.notesHit[num] = True #QQstarS:Set [0] to [i]
-
-            else:
-                ApplyPenalty = True
-
-                if pullOff:   #always ignore bad pull-offs
-                    ApplyPenalty = False
-
-                if (self.hopoStyle == 3 and hopo == True):  #GH2
-                    ApplyPenalty = False
-                    if not (self.instruments[num].LastStrumWasChord or (self.instruments[num].wasLastNoteHopod and LastHopoFretStillHeld)):
-                        self.instruments[num].hopoActive = 0
+        if not hopo and self.instruments[num].wasLastNoteHopod and not self.instruments[num].LastStrumWasChord and not self.instruments[num].sameNoteHopoString:
+            if LastHopoFretStillHeld == True and HigherFretsHeld == False:
+                if self.instruments[num].wasLastNoteHopod and hopoFudge >= 0 and hopoFudge < self.instruments[num].lateMargin:
+                    if self.instruments[num].hopoActive < 0:
                         self.instruments[num].wasLastNoteHopod = False
-                        self.instruments[num].LastStrumWasChord = False
-                        self.instruments[num].sameNoteHopoString = False
-                        self.instruments[num].hopoProblemNoteNum = -1
-                        self.instruments[num].hopoLast = -1
+                        return
+                    elif self.instruments[num].hopoActive > 0:  #make sure it's hopoActive!
+                        self.instruments[num].wasLastNoteHopod = False
+                        return
 
-                if self.instruments[num].sameNoteHopoString:
-                    if LastHopoFretStillHeld:
-                        ApplyPenalty = False
-                        self.instruments[num].playedNotes = self.instruments[num].lastPlayedNotes   #restore played notes status
-                        self.instruments[num].sameNoteHopoString = False
-                        self.instruments[num].hopoProblemNoteNum = -1
-                    elif HigherFretsHeld:
-                        self.instruments[num].sameNoteHopoString = False
-                        self.instruments[num].hopoProblemNoteNum = -1
+        #MFH - here, just check to see if we can release the expectation for an acceptable overstrum:
+        if self.instruments[num].sameNoteHopoString and not problemNoteStillHeld:
+            self.instruments[num].sameNoteHopoString = False
+            self.instruments[num].hopoProblemNoteNum = -1
 
+        if self.instruments[num].startPick3(self.song, pos, self.controls, hopo):
+            self.processedFirstNoteYet = True
+            self.song.setInstrumentVolume(1.0, self.playerList[num].part)
 
-                if ApplyPenalty == True:
+            self.notesHit[num] = True #QQstarS:Set [0] to [i]
 
+        else:
+            ApplyPenalty = True
+
+            if pullOff:   #always ignore bad pull-offs
+                ApplyPenalty = False
+
+            if (self.hopoStyle == 3 and hopo == True):  #GH2
+                ApplyPenalty = False
+                if not (self.instruments[num].LastStrumWasChord or (self.instruments[num].wasLastNoteHopod and LastHopoFretStillHeld)):
                     self.instruments[num].hopoActive = 0
                     self.instruments[num].wasLastNoteHopod = False
+                    self.instruments[num].LastStrumWasChord = False
                     self.instruments[num].sameNoteHopoString = False
                     self.instruments[num].hopoProblemNoteNum = -1
                     self.instruments[num].hopoLast = -1
-                    self.song.setInstrumentVolume(0.0, self.playerList[num].part)
-                    
-                    self.instruments[num].setMultiplier(1)
-                    self.notesMissed[num] = True #QQstarS:Set [0] to [i]
+
+            if self.instruments[num].sameNoteHopoString:
+                if LastHopoFretStillHeld:
+                    ApplyPenalty = False
+                    self.instruments[num].playedNotes = self.instruments[num].lastPlayedNotes   #restore played notes status
+                    self.instruments[num].sameNoteHopoString = False
+                    self.instruments[num].hopoProblemNoteNum = -1
+                elif HigherFretsHeld:
+                    self.instruments[num].sameNoteHopoString = False
+                    self.instruments[num].hopoProblemNoteNum = -1
+
+
+            if ApplyPenalty == True:
+
+                self.instruments[num].hopoActive = 0
+                self.instruments[num].wasLastNoteHopod = False
+                self.instruments[num].sameNoteHopoString = False
+                self.instruments[num].hopoProblemNoteNum = -1
+                self.instruments[num].hopoLast = -1
+                self.song.setInstrumentVolume(0.0, self.playerList[num].part)
+                
+                self.notesMissed[num] = True #QQstarS:Set [0] to [i]
 
 
     def run(self, ticks):
         if self.song and self.song.readyToGo and not self.pause:
             super(GuitarScene, self).run(ticks)
+            if self.songPos <= 0:
+                sngPos = self.song.getPosition()
+                if sngPos <= 0.0:
+                    self.songPos = sngPos - self.countdown * self.song.period
+            if self.songPos >= -.02 and self.songPos <= 0.02:
+                self.songPos = 0.0
             if not self.resumeCountdown and not self.pause:
-                pos = self.getSongPosition()
+
+                #test = self.song.getPosition() - self.countdown * self.song.period
+                #if test > 0.0:
+                    #self.songPos = test
+                self.songPos += ticks
+                pos = self.songPos
+                #print (self.songPos, test, self.countdown * self.song.period)
 
                 self.song.update(ticks)
             else:
                 pos = self.pausePos
-
-            if self.vbpmLogicType == 1:
-                self.handleTempo(self.song, pos)  #MFH - new global tempo / BPM handling logic
 
             for i,instrument in enumerate(self.instruments):
                 playerNum = i
 
                 instrument.camAngle = -degrees(atan(abs(self.camera.origin[2] - self.camera.target[2]) / abs(self.camera.origin[1] - self.camera.target[1])))
 
-                if not instrument.run(ticks, pos, self.controls):
+                if not instrument.run(ticks, pos, self.song, self.controls):
                     # done playing the current notes
                     self.endPick(i)
 
@@ -878,7 +799,6 @@ class GuitarScene(Scene):
                     if not self.processedFirstNoteYet:
                         self.notesMissed[i] = True
                     self.processedFirstNoteYet = True
-                    instrument.setMultiplier(1)
                     instrument.hopoLast = -1
                     self.song.setInstrumentVolume(0.0, self.playerList[playerNum].part)
 
@@ -892,8 +812,6 @@ class GuitarScene(Scene):
                 self.countdownSeconds = self.countdown / self.songBPS + 1
 
                 if not self.countdown:  #MFH - when countdown reaches zero, will only be executed once
-                    #RF-mod should we collect garbage when we start?
-                    self.engine.collectGarbage()
                     self.song.setAllTrackVolumes(1)
                     self.song.play()
 
@@ -925,9 +843,7 @@ class GuitarScene(Scene):
             self.engine.view.setViewport(1,0)
 
     def getSongPosition(self):
-        if self.song and self.song.readyToGo:
-            return self.song.getPosition() - self.countdown * self.song.period
-        return 0.0
+        return self.songPos
 
     def goToResults(self):
         if self.song:
