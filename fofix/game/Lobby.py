@@ -133,4 +133,4 @@ class Lobby(Layer, KeyListener):
     def renderPanels(self):
         optionFont    = self.fontDict[self.theme.lobbyOptionFont]
         glColor3f(1,1,1)
-        optionFont.render("Test", (.5, .5))
+        optionFont.render("Press Enter to Continue, esc to exit.", (.5, .5))
