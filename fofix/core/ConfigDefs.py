@@ -259,22 +259,6 @@ Config.define("fretboard",   "point_of_view",                 int,   5,      tex
 Config.define("game",   "party_time",          int,   30,     text = _("Party Mode Timer"), options = dict([(n, n) for n in range(1, 99)]), tipText = _("Sets the timer in Party Mode."))
 Config.define("performance",   "disable_libcount",    bool,  True,  text = _("Show Setlist Size"),    options = {False: _("Yes"), True: _("No")}, tipText = _("Show the number of songs inside of each setlist."))
 
-Config.define("game",   "jurg_p0",             bool, False,   text = _("P1 AI"), options = {True: _("On"), False: _("Off")}, tipText = _("Enable or disable the player 1 AI"))
-Config.define("game",   "jurg_skill_p0",        int, 5,   text = _("P1 AI Personality"), options = {0: _("1. KiD"), 1: _("2. Stump"), 2: _("3. akedRobot"), 3: _("4. Q"), 4: _("5. MFH"), 5: _("6. Jurgen")}, tipText = _("Set the personality of the player 1 AI. The numbers correspond with their skill."))
-Config.define("game",   "jurg_logic_p0",            int,   1,      text = _("P1 AI Logic"), options = sortOptionsByKey({0: _("Original"), 1: _("MFH-Early"), 2: _("MFH-OnTime1"), 3: _("MFH-OnTime2")}), tipText = _("Set the logic used for the player 1 AI. 'Original' cannot handle fast sections. 'MFH-Early' attempts to hit notes as they enter the hit window. 'MFH-OnTime' are implementations that attempt to hit the notes as they happen, like a real player."))
-
-Config.define("game",   "jurg_p1",             bool, False,   text = _("P2 AI"), options = {True: _("On"), False: _("Off")}, tipText = _("Enable or disable the player 2 AI"))
-Config.define("game",   "jurg_skill_p1",        int, 5,   text = _("P2 AI Personality"), options = {0: _("1. KiD"), 1: _("2. Stump"), 2: _("3. akedRobot"), 3: _("4. Q"), 4: _("5. MFH"), 5: _("6. Jurgen")}, tipText = _("Set the personality of the player 2 AI. The numbers correspond with their skill."))
-Config.define("game",   "jurg_logic_p1",            int,   1,      text = _("P2 AI Logic"), options = sortOptionsByKey({0: _("Original"), 1: _("MFH-Early"), 2: _("MFH-OnTime1"), 3: _("MFH-OnTime2")}), tipText = _("Set the logic used for the player 2 AI. 'Original' cannot handle fast sections. 'MFH-Early' attempts to hit notes as they enter the hit window. 'MFH-OnTime' are implementations that attempt to hit the notes as they happen, like a real player."))
-
-Config.define("game",   "jurg_p2",             bool, False,   text = _("P3 AI"), options = {True: _("On"), False: _("Off")}, tipText = _("Enable or disable the player 3 AI"))
-Config.define("game",   "jurg_skill_p2",        int, 5,   text = _("P3 AI Personality"), options = {0: _("1. KiD"), 1: _("2. Stump"), 2: _("3. akedRobot"), 3: _("4. Q"), 4: _("5. MFH"), 5: _("6. Jurgen")}, tipText = _("Set the personality of the player 3 AI. The numbers correspond with their skill."))
-Config.define("game",   "jurg_logic_p2",            int,   1,      text = _("P3 AI Logic"), options = sortOptionsByKey({0: _("Original"), 1: _("MFH-Early"), 2: _("MFH-OnTime1"), 3: _("MFH-OnTime2")}), tipText = _("Set the logic used for the player 3 AI. 'Original' cannot handle fast sections. 'MFH-Early' attempts to hit notes as they enter the hit window. 'MFH-OnTime' are implementations that attempt to hit the notes as they happen, like a real player."))
-
-Config.define("game",   "jurg_p3",             bool, False,   text = _("P4 AI"), options = {True: _("On"), False: _("Off")}, tipText = _("Enable or disable the player 4 AI"))
-Config.define("game",   "jurg_skill_p3",        int, 5,   text = _("P4 AI Personality"), options = {0: _("1. KiD"), 1: _("2. Stump"), 2: _("3. akedRobot"), 3: _("4. Q"), 4: _("5. MFH"), 5: _("6. Jurgen")}, tipText = _("Set the personality of the player 4 AI. The numbers correspond with their skill."))
-Config.define("game",   "jurg_logic_p3",            int,   1,      text = _("P4 AI Logic"), options = sortOptionsByKey({0: _("Original"), 1: _("MFH-Early"), 2: _("MFH-OnTime1"), 3: _("MFH-OnTime2")}), tipText = _("Set the logic used for the player 4 AI. 'Original' cannot handle fast sections. 'MFH-Early' attempts to hit notes as they enter the hit window. 'MFH-OnTime' are implementations that attempt to hit the notes as they happen, like a real player."))
-
 #akedrou
 Config.define("game",   "midi_lyric_mode",     int, 2,     text = _("Lyric Display Mode"),  options = {0: _("Scrolling"), 1: _("Simple Lines"), 2: _("2-Line")}, tipText = _("Sets the display mode for MIDI lyrics. Both 'Simple Lines' and '2-Line' will show as single phrases when playing the vocal part."))
 Config.define("game",   "vocal_scroll",        int, 2,     text = _("Lyric Speed Mode"),    options = sortOptionsByKey({0: _("BPM"), 1: _("Difficulty"), 2: _("BPM & Diff")}), tipText = _("Sets what determines the speed of the scrolling lyrics."))
@@ -303,4 +287,3 @@ Config.define("coffee", "failingEnabled",       bool, True,     text = _("No Fai
 Config.define("game", "songlist_difficulty", int, 0, text = _("Difficulty (Setlist Score)"), options = difficulties, tipText = _("Sets the default difficulty displayed in the setlist score."))
 
 Config.define("game", "songlist_instrument", int, 0, text = _("Instrument (Setlist Score)"), options = parts, tipText = _("Sets the default part displayed in the setlist score."))  #MFH
-
