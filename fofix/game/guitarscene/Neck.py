@@ -45,9 +45,6 @@ class Neck:
 
         self.oNeckovr = None    #MFH - needs to be here to prevent crashes!
 
-        self.staticStrings  = self.engine.config.get("performance", "static_strings")
-
-
         self.boardWidth     = self.engine.theme.neckWidth
         self.boardLength    = self.engine.theme.neckLength
 
@@ -125,8 +122,6 @@ class Neck:
                                [color[0], color[1], color[2], 1.0],
                                [color[0], color[1], color[2], 1.0],
                                [color[0], color[1], color[2], 1.0]], dtype=np.float32)
-
-        self.incomingNeckMode = self.engine.config.get("game", "incoming_neck_mode")
 
         self.currentPeriod  = 60000.0 / self.instrument.currentBpm
         self.lastBpmChange  = -1.0

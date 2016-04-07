@@ -48,33 +48,23 @@ class Instrument(object):
         self.freestyleActive = False
         self.drumFillsActive = False
 
-        self.incomingNeckMode = self.engine.config.get("game", "incoming_neck_mode")
-        self.guitarSoloNeckMode = self.engine.config.get("game", "guitar_solo_neck")
-
         self.beatsPerBoard            = 5.0
         self.boardWidth               = self.engine.theme.neckWidth
         self.boardLength              = self.engine.theme.neckLength
         self.beatsPerUnit             = self.beatsPerBoard / self.boardLength
-        self.fretColors               = self.engine.theme.noteColors
-        self.useFretColors            = self.engine.theme.use_fret_colors
 
-        if not self.engine.theme.killNoteColor == "frets":
-            kC = self.engine.theme.killNoteColor
-            self.killColor = [kC, kC, kC, kC, kC]
-        else:
-            self.killColor = self.fretColors
+        self.fretColors = self.engine.theme.noteColors
+        self.useFretColors = self.engine.theme.use_fret_colors
+        self.flameColors = self.fretColors
+        self.hitGlowColors = self.fretColors
+        self.glowColor = self.fretColors
+        self.killColor = self.fretColors
 
         self.playedNotes    = []
         self.missedNotes    = []
 
-        self.useMidiSoloMarkers = False
-        self.canGuitarSolo = False
-        self.guitarSolo = False
         self.sameNoteHopoString = False
         self.hopoProblemNoteNum = -1
-        self.currentGuitarSoloHitNotes = 0
-
-        self.cappedScoreMult = 0
 
         self.currentBpm     = 120.0   #MFH - need a default 120BPM to be set in case a custom song has no tempo events.
         self.currentPeriod  = 60000.0 / self.currentBpm
@@ -92,72 +82,37 @@ class Instrument(object):
 
         self.killPoints = False
 
-        #get difficulty
+        # get difficulty
         self.difficulty = playerObj.getDifficultyInt()
         self.controlType = playerObj.controlType
 
-        #MFH - I do not understand fully how the handicap scorecard works at the moment, nor do I have the time to figure it out.
-        #... so for now, I'm just writing some extra code here for the early hitwindow size handicap.
-        self.earlyHitWindowSizeFactor = 0.5
-
-        self.hitw = self.engine.config.get("game", "note_hit_window")  #this should be global, not retrieved every BPM change.
-        if self.hitw == 0:
-            self.hitw = 2.3
-        elif self.hitw == 1:
-            self.hitw = 1.9
-        elif self.hitw == 2:
-            self.hitw = 1.2
-        elif self.hitw == 3:
-            self.hitw = 1.0
-        elif self.hitw == 4:
-            self.hitw = 0.70
-        else:
-            self.hitw = 1.2
+        self.earlyHitWindowSizeFactor = 0.10
+        self.hitw = 1.2
 
         #myfingershurt: need a separate variable to track whether or not hopos are actually active
         self.wasLastNoteHopod = False
 
-
         self.hopoLast       = -1
-        self.hopoColor      = (0, .5, .5)
         self.player         = player
 
         self.hit = [False, False, False, False, False]
 
-        self.freestyleHit = [False, False, False, False, False]
-
         #myfingershurt: this should be retrieved once at init, not repeatedly in-game whenever tails are rendered.
-        self.notedisappear = self.engine.config.get("game", "notedisappear")
         self.fretsUnderNotes  = self.engine.config.get("game", "frets_under_notes")
-        self.staticStrings  = self.engine.config.get("performance", "static_strings")
 
-        self.muteSustainReleases = self.engine.config.get("game", "sustain_muting") #MFH
-
-
-        self.twoChord       = 0
-        self.twoChordApply  = False
         self.hopoActive     = 0
 
         self.LastStrumWasChord = False
 
-        self.vbpmLogicType = self.engine.config.get("debug",   "use_new_vbpm_beta")
-
         #Get theme
         self.theme = self.engine.data.theme
-
-        self.spRefillMode = self.engine.config.get("game","sp_notes_while_active")
-        self.hitglow_color = self.engine.config.get("video", "hitglow_color") #this should be global, not retrieved every fret render.
 
         #blazingamer
         self.nstype = self.engine.config.get("game", "nstype")                  # neck style
         self.noterotate = self.engine.config.get("coffee", "noterotate")        # adjust notes for if they were designed for FoF 1.1 or 1.2
         self.billboardNote = self.engine.theme.billboardNote                    # 3D notes follow the angle of the camera
 
-        #MFH- fixing neck speed
-        if self.nstype < 3:   #not constant mode:
-            self.speed = self.engine.config.get("coffee", "neckSpeed")*0.01
-        else:   #constant mode
-            self.speed = 410 - self.engine.config.get("coffee", "neckSpeed")    # invert this value
+        self.speed = self.engine.config.get("coffee", "neckSpeed") * 0.01
 
         self.boardScaleX    = self.boardWidth/3.0
         self.boardScaleY    = self.boardLength/9.0
@@ -167,15 +122,10 @@ class Instrument(object):
         self.neck = Neck(self.engine, self, playerObj)
         self.setBPM(self.currentBpm)
 
-        self.maxStars = []
-        self.starNotes = []
-        self.totalNotes = 0
-
         self.keys = []
         self.actions = []
         self.soloKey = []
 
-        self.disableVBPM  = self.engine.config.get("game", "disable_vbpm")
         self.disableFretSFX  = self.engine.config.get("video", "disable_fretsfx")
         self.disableFlameSFX  = self.engine.config.get("video", "disable_flamesfx")
 
@@ -185,43 +135,16 @@ class Instrument(object):
         self.keyColor = self.engine.theme.keyColor
         self.key2Color = self.engine.theme.key2Color
 
-        self.hitFlameYPos         = self.engine.theme.hitFlamePos[0]
-        self.hitFlameZPos         = self.engine.theme.hitFlamePos[1]
-        self.holdFlameYPos        = self.engine.theme.holdFlamePos[0]
-        self.holdFlameZPos        = self.engine.theme.holdFlamePos[1]
-        self.hitFlameSize         = self.engine.theme.hitFlameSize
-        self.holdFlameSize        = self.engine.theme.holdFlameSize
-        self.hitFlameBlackRemove  = self.engine.theme.hitFlameBlackRemove
-        self.hitGlowsBlackRemove  = self.engine.theme.hitGlowsBlackRemove
-        self.hitGlowOffset        = self.engine.theme.hitGlowOffset
-        self.hitFlameOffset       = self.engine.theme.hitFlameOffset
-        self.drumHitFlameOffset   = self.engine.theme.drumHitFlameOffset
-        self.hitGlowsRotation     = self.engine.theme.hitFlameRotation
-        self.hitFlameRotation     = self.engine.theme.hitFlameRotation
+        self.hitFlameYPos         = 0.5
+        self.hitFlameZPos         = 0.0
+        self.holdFlameYPos        = 0.0
+        self.holdFlameZPos        = 0.0
+        self.hitFlameSize         = 0.075
+        self.holdFlameSize        = 0.075
+        self.hitFlameBlackRemove  = True
+        self.hitGlowsBlackRemove  = True
+        self.hitFlameRotation = self.hitGlowsRotation = (90, 1, 0, 0)
 
-        #all flames/glows are set to there corresponding color else they are set to the fret colors
-        if not self.engine.theme.flamesColor == "frets":
-            fC = self.engine.theme.flamesColor
-            self.flameColors = [fC, fC, fC, fC, fC]
-        else:
-            self.flameColors = self.fretColors
-
-        if not self.engine.theme.hitGlowColor == "frets":
-            hGC = self.engine.theme.hitGlowColor
-            self.hitGlowColors = [hGC, hGC, hGC, hGC, hGC]
-        else:
-            self.hitGlowColors = self.fretColors
-
-        if not self.engine.theme.glowColor == "frets":
-            gC = self.engine.theme.glowColor
-            self.glowColor = [gC, gC, gC, gC, gC]
-        else:
-            self.glowColor = self.fretColors
-
-        self.twoChordMax = False
-
-        self.canGuitarSolo = False
-        self.guitarSolo = False
         self.fretboardHop = 0.00  #stump
 
         #Tail's base arrays will get modified overtime
@@ -434,6 +357,7 @@ class Instrument(object):
         self.baseBeat          += (time - self.lastBpmChange) / self.currentPeriod
         self.targetBpm          = bpm
         self.lastBpmChange      = time
+
         self.neck.lastBpmChange = time
         self.neck.baseBeat      = self.baseBeat
 
@@ -516,8 +440,6 @@ class Instrument(object):
                     else:
                         z = 0
 
-                    y -= self.hitGlowOffset[n]
-
                     color = self.hitGlowColors[n]
                     color = tuple([color[ifc] + .38 for ifc in range(3)]) #to make sure the final color looks correct on any color set
 
@@ -593,11 +515,6 @@ class Instrument(object):
                         z = s - self.hitFlameZPos
                     else:
                         z = 0
-
-                    if self.isDrum:
-                        y -= self.drumHitFlameOffset[event.number]
-                    else:
-                        y -= self.hitFlameOffset[event.number]
 
                     y + .665
 
@@ -726,14 +643,6 @@ class Instrument(object):
             if (event.played or event.hopod): #if the note is hit
                 continue
 
-            elif z < 0: #Notes past frets
-                #if none of the below they keep on going, it would be self.notedisappear == 1
-                if self.notedisappear == 0: #Notes disappear
-                    continue
-
-                elif self.notedisappear == 2: #Notes turn red
-                    color = (1, 0, 0, 1)#turn note red
-
 
             if self.isDrum:
                 sustain = False
@@ -802,14 +711,6 @@ class Instrument(object):
             if (event.played or event.hopod): #if the note is hit
                 continue
 
-            elif z < 0: #Notes past frets
-                #if none of the below they keep on going, it would be self.notedisappear == 1
-                if self.notedisappear == 0: #Notes disappear
-                    continue
-
-                elif self.notedisappear == 2: #Notes turn red
-                    color = (1, 0, 0, 1)#turn note red
-
 
             sustain = False
 
@@ -853,17 +754,11 @@ class Instrument(object):
                     glPopMatrix()
                     s += 0.2
 
-                #Hitglow color
-                if self.hitglow_color == 0:
-                    glowcol = (c[0], c[1], c[2])#Same as fret
-                elif self.hitglow_color == 1:
-                    glowcol = (1, 1, 1)#Actual color
-
                 f += 2
 
                 draw3Dtex(self.glowDrawing, coord = (x, 0, 0.01), rot = (f * 90 + self.time, 0, 1, 0),
                                     texcoord = (0.0, 0.0, 1.0, 1.0), vertex = (-size * f, -size * f, size * f, size * f),
-                                    multiples = True, alpha = True, color = glowcol)
+                                    multiples = True, alpha = True, color = c[:3])
 
     def renderTail(self, song, length, sustain, color, tailOnly = False, isTappable = False, big = False, fret = 0, pos = 0):
 
@@ -964,7 +859,7 @@ class Instrument(object):
         renderedNotes = self.getRequiredNotesForRender(song,pos)
 
         for time, event in renderedNotes:
-            
+
             if not isinstance(event, Note):
                 continue
 

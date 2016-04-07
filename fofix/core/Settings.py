@@ -152,7 +152,6 @@ class SettingsMenu(Menu.Menu):
 
         self.fretSettings = [
             ConfigChoice(self.engine, self.engine.config, "fretboard", "point_of_view", autoApply = True),
-            ConfigChoice(self.engine, self.engine.config, "game", "notedisappear", autoApply = True),
             ConfigChoice(self.engine, self.engine.config, "game", "frets_under_notes", autoApply = True), #MFH
             ConfigChoice(self.engine, self.engine.config, "game", "nstype", autoApply = True),      #blazingamer
             ConfigChoice(self.engine, self.engine.config, "coffee", "neckSpeed", autoApply = True),

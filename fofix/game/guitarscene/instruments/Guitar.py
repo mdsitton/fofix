@@ -43,7 +43,7 @@ from fofix.core import cmgl
 from fofix.core import Log
 
 class Guitar(Instrument):
-    def __init__(self, engine, playerObj, editorMode = False, player = 0, bass = False):
+    def __init__(self, engine, playerObj, player = 0, bass = False):
 
         self.isDrum = False
         self.isBassGuitar = bass
@@ -66,9 +66,6 @@ class Guitar(Instrument):
 
         self.missedNotes    = []
         self.missedNoteNums = []
-        self.editorMode     = editorMode
-
-        self.freestyleHitFlameCounts = [0 for n in range(self.strings+1)]    #MFH
 
         self.fretActivity   = [0.0] * self.strings
 
@@ -102,8 +99,6 @@ class Guitar(Instrument):
         self.tailsEnabled = True
 
         self.loadImages()
-
-        self.twoChordMax = False
 
         self.rockLevel = 0.0
 
@@ -230,7 +225,6 @@ class Guitar(Instrument):
 
         self.missedNotes = []
         self.missedNoteNums = []
-        twochord = 0
         for chord in chordlist:
             # matching keys?
             requiredKeys = [note.number for time, note in chord]
@@ -252,8 +246,6 @@ class Guitar(Instrument):
                     self.missedNoteNums.append(note.number)
                 note.skipped = True
                 note.played = False
-        if twochord == 2:
-            self.twoChord += skipped
 
         return True
 
@@ -274,28 +266,15 @@ class Guitar(Instrument):
         chordlist = chords.values()
         chordlist.sort(key=lambda a: a[0][0])
 
-        twochord = 0
         for chord in chordlist:
             # matching keys?
             self.requiredKeys = [note.number for time, note in chord]
             self.requiredKeys = self.uniqify(self.requiredKeys)
 
-            if len(self.requiredKeys) > 2 and self.twoChordMax == True:
-                twochord = 0
-                self.twoChordApply = True
-                for n, k in enumerate(self.keys):
-                    if controls.getState(k):
-                        twochord += 1
-                if twochord == 2:
-                    self.requiredKeys = [min(self.requiredKeys), max(self.requiredKeys)]
-                else:
-                    twochord = 0
-
             if (self.controlsMatchNote3(controls, chord, self.requiredKeys, False)):
                 return True
             else:
                 return False
-
 
     def uniqify(self, seq):
         # order preserving
@@ -356,8 +335,6 @@ class Guitar(Instrument):
                 self.pickStartPos = max(self.pickStartPos, time)
                 note.played       = True
                 self.playedNotes.append([time, note])
-                if self.guitarSolo:
-                    self.currentGuitarSoloHitNotes += 1
             return True
         return False
 
@@ -400,8 +377,6 @@ class Guitar(Instrument):
                 self.wasLastNoteHopod = False
             self.hopoLast     = note.number
             self.playedNotes.append([time, note])
-            if self.guitarSolo:
-                self.currentGuitarSoloHitNotes += 1
 
         #myfingershurt: be sure to catch when a chord is played
         if len(self.playedNotes) > 1:

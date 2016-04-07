@@ -55,7 +55,7 @@ from fofix.core import Log
 # to enable it, only here and Player.drums should need changing.
 
 class Drum(Instrument):
-    def __init__(self, engine, playerObj, editorMode = False, player = 0):
+    def __init__(self, engine, playerObj, player = 0):
 
         self.isDrum = True
         self.isBassGuitar = False
@@ -86,17 +86,12 @@ class Drum(Instrument):
         self.openFretActivity = 0.0
         self.openFretColor  = self.fretColors[5]
 
-        self.editorMode     = editorMode
-
         self.lanenumber     = float(4)
         self.fretImgColNumber = float(6)
 
         self.logClassInits = self.engine.config.get("game", "log_class_inits")
         if self.logClassInits == 1:
             Log.debug("Drum class initialization!")
-
-
-        self.freestyleHitFlameCounts = [0 for n in range(self.strings+1)]    #MFH
 
         self.fretActivity   = [0.0] * self.strings
 

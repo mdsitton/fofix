@@ -55,8 +55,6 @@ Config.define("video",  "disable_flamesfx", bool, False, text = _("Show Fret Fla
 Config.define("video",  "resolution",   str,   "640x480")
 Config.define("video",  "fps",          int,   60,    text = _("Frames per Second"), options = dict([(n, n) for n in range(0, 121)]), tipText = _("Set the number of frames to render per second. Higher values are better, but your computer may not be able to keep up. You probably can leave this alone. (This is affected by the 'Performance' quickset)"))
 Config.define("video",  "show_fps",     bool,   False,  text = _("Print Frames per Second"), options = {False: _("No"), True: _("Yes")}, tipText = _("This will display your FPS on some screens, and if running from sources will print your FPS there every two seconds."))
-Config.define("video",  "hitglow_color", int,  0,     text = _("Fret Glow Color"), options = {0: _("Same as Fret"), 1: _("Actual Color")}, tipText = _("Sets whether or not the fret glow image will be color-masked with the theme-determined fret color."))
-
 #stump
 Config.define('video',  'disable_screensaver', bool, True, text=_('Disable Screensaver'), options={True: _('Yes'), False: _('No')}, tipText=_('Set whether the game disables the screensaver while it is running.  Does not necessarily work on all platforms.'))
 
@@ -98,7 +96,6 @@ Config.define("audio",  "songvol",    float,    0.8,  text = _("Background Volum
 
 Config.define("performance", "game_priority",       int,   2,      text = _("Process Priority"), options = sortOptionsByKey({0: _("Idle"), 1: _("Low"), 2: _("Normal"), 3:_("Above Normal"), 4:_("High"), 5:_("Realtime")}), tipText = _("Change this to increase the priority of the FoFiX process. Don't change this unless you know what you're doing. DO NOT set this to Realtime. Ever."))
 Config.define("performance", "restrict_to_first_processor", bool, False, text=_("Restrict to First Core (Win32 Only)"), options={False: _("No"), True: _("Yes")}, tipText=_("Choose whether to restrict the game to running on only the first processor core on the system. Only has an effect under Windows."))  #stump
-Config.define("game",   "notedisappear",      int,   1,  text = _("Missed Notes"), options = {0: _("Disappear"), 1: _("Keep on going"), 2: _("Turn Red")}, tipText = _("When you miss a note, this sets whether they disappear from the fretboard, scroll off the bottom of the screen or turn red"))
 
 #akedrou - Quickset (based on Fablaculp's Performance Autoset)
 Config.define("quickset", "performance", int, 0, text = _("Performance"), options = sortOptionsByKey({0: _("Manual"), 1: _("Pure Speed"), 2: _("Fast"), 3: _("Quality (Recommended)"), 4: _("Max Quality (Slow)")}), tipText = _("Set the performance of your game. You can fine-tune in the advanced menus."))
@@ -129,7 +126,6 @@ Config.define("game",   "drum_navigation",          bool, True,  text = _("Drum 
 Config.define("game", "decimal_places",      int, 1,  text = _("Stat Decimal Places"), options = dict([(n, n) for n in range(0, 3)]), tipText = _("Determines how many decimal places will be noted in displaying stats."))
 
 Config.define("game",   "ignore_open_strums",          bool, True,  text = _("Ignore Open Strums"), options = {False: _("No"), True: _("Yes")}, tipText = _("If enabled, strumming without holding any frets down won't be counted."))
-Config.define("performance",   "static_strings",          bool, True,  text = _("Static Strings"), options = {False: _("No"), True: _("Yes")}, tipText = _("If enabled, the 'strings' on your fretboard will not scroll."))
 Config.define("game",   "whammy_saves_starpower",          bool, False,  text = _("Effects Save SP"), options = {False: _("No"), True: _("Yes")}, tipText = _("If enabled, whammying while in SP will slow down its decrease. And your score will be handicapped by 5%."))
 Config.define("game",   "hopo_indicator",          bool, False,  text = _("Show HO/PO Indicator"), options = {False: _("No"), True: _("Yes")}, tipText = _("If enabled, 'HOPO' will appear in game. When there are HOPO notes active, it will turn white."))
 Config.define("game",   "quickplay_tiers",          int, 1,  text = _("Use Tiers in Quickplay"), options = {0: _("Off"), 1: _("Normal"), 2: _("Sorting")}, tipText = _("Sets whether to mark tiers in quickplay mode. 'Normal' will use the career tiers and 'Sorting' will insert tiers based on the current sort order."))
@@ -173,7 +169,6 @@ Config.define("game",  "cheer_loop_delay",        int,   550,   text = _("Cheer 
 Config.define("game", "miss_pauses_anim",       int, 0,     text = _("Miss Pauses Anim"), options = {0: _("Off"), 1: _("On")}, tipText = _("When enabled, missing a note will pause the stage animation.")) #MFH
 Config.define("game", "song_hopo_freq",       int, 1,     text = _("Song HO/PO Freq"), options = {0: _("Off"), 1: _("On")}, tipText = _("Sets whether or not to use the HO/PO Frequency setting determined by the fretter, if available.")) #MFH
 Config.define("game",   "mute_drum_fill",           int, 1,    text = _("Mute Drum Track During Fills"), options = {0: _("No"), 1:_("Yes")}, tipText = _("Sets whether or not the drum track will be muted during drum fills (so you can hear yourself have at it!)"))
-Config.define("game",   "sustain_muting",          int, 1,    text = _("Sustain Muting"), options = sortOptionsByKey({0: _("Never Mute"), 1: _("Very Early"), 2: _("Early"), 3: _("Standard"), 4: _("Always Mute")}), tipText = _("Sets the window used to determine whether or not to mute a dropped sustain note. 'Early' means it will only mute when you drop the sustain relatively early."))
 Config.define("game",   "solo_frame",          int, 1,    text = _("Show Solo Frame"), options = {0: _("Off"), 1: _("On")}, tipText = _("Sets whether to show a frame around the solo stats, if available."))
 Config.define("game",   "mark_solo_sections",  int, 1,    text = _("Enable Guitar Solos"), options = sortOptionsByKey({0: _("Never"), 1: _("Always"), 2: _("By Theme"), 3: _("MIDI Only")}), tipText = _("Sets the logic used to mark solos. 'Always' will mark solos in sections if available. 'By Theme' leaves it to the theme creator. 'MIDI Only' only enables solos marked with the MIDI marker note."))
 Config.define("game",   "starpower_mode",          int, 2,    text = _("SP Mode"), options = {0: _("Off"), 1: _("FoF"), 2: _("Auto MIDI")}, tipText = _("Sets the logic used to determine starpower phrases. 'FoF' will generate paths based on the number of notes. 'Auto MIDI' will use MIDI markers to determine the paths, and fall back on the FoF mode if none are available."))
