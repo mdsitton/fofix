@@ -480,6 +480,8 @@ class GuitarScene(Scene):
             control = self.controls.keyPressed(key)
 
         num = self.getPlayerNum(control)
+        if num is None:
+            return
 
         pressed = False
 
