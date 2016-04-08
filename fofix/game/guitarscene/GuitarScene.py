@@ -479,6 +479,11 @@ class GuitarScene(Scene):
         if not control:
             control = self.controls.keyPressed(key)
 
+        if control in Player.starts:
+            self.pauseGame()
+            self.engine.view.pushLayer(self.menu)
+            return True
+
         num = self.getPlayerNum(control)
         if num is None:
             return
@@ -541,13 +546,6 @@ class GuitarScene(Scene):
                     return True
         if pressed:
             self.doPick(num)
-
-        if control in Player.starts:
-            if self.ending == True:
-                return True
-            self.pauseGame()
-            self.engine.view.pushLayer(self.menu)
-            return True
 
     def keyReleased(self, key):
 
