@@ -468,7 +468,7 @@ class Instrument(object):
 
 
     #renders the flames that appear when a note is struck
-    def renderFlames(self, song, pos):
+    def renderFlames(self, notes, song, pos):
         if not song or self.flameColors[0][0] == -1:
             return
 
@@ -477,7 +477,7 @@ class Instrument(object):
 
         flameLimit = 10.0
         flameLimitHalf = round(flameLimit/2.0)
-        renderedNotes = self.getRequiredNotesForRender(song,pos)
+        renderedNotes = notes
 
         alphaEnabled = self.hitFlameBlackRemove
 
@@ -578,7 +578,7 @@ class Instrument(object):
                               scale = (1,1,1), rot = (self.camAngle ,1,0,0), multiples = False, color = color)
 
 
-    def renderNotes(self, visibility, song, pos):
+    def renderNotes(self, notes, visibility, song, pos):
         if not song and not song.readyToGo:
             return
 
@@ -588,7 +588,7 @@ class Instrument(object):
 
         w = self.boardWidth / self.strings
 
-        renderedNotes = reversed(self.getRequiredNotesForRender(song,pos))
+        renderedNotes = reversed(notes)
         for time, event in renderedNotes:
 
             if not isinstance(event, Note):
@@ -667,7 +667,7 @@ class Instrument(object):
                 self.renderNote(length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, fret = event.number, )
                 glPopMatrix()
 
-    def renderOpenNotes(self, visibility, song, pos):
+    def renderOpenNotes(self, notes, visibility, song, pos):
         if not song:
             return
         if not song.readyToGo:
@@ -677,7 +677,7 @@ class Instrument(object):
 
         self.killPoints = False
 
-        renderedNotes = reversed(self.getRequiredNotesForRender(song,pos))
+        renderedNotes = reversed(notes)
         for time, event in renderedNotes:
 
             if not isinstance(event, Note):
@@ -845,7 +845,7 @@ class Instrument(object):
         if tailOnly:
             return
 
-    def renderTails(self, visibility, song, pos, killswitch):
+    def renderTails(self, notes, visibility, song, pos, killswitch):
         if not song:
             return
         if not song.readyToGo:
@@ -856,7 +856,7 @@ class Instrument(object):
         w = self.boardWidth / self.strings
 
         num = 0
-        renderedNotes = self.getRequiredNotesForRender(song,pos)
+        renderedNotes = notes
 
         for time, event in renderedNotes:
 

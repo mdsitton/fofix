@@ -132,13 +132,13 @@ class Guitar(Instrument):
 
 
     def render(self, visibility, song, pos, controls, killswitch):
-
-        self.renderTails(visibility, song, pos, killswitch)
+        notes = self.getRequiredNotesForRender(song, pos)
+        self.renderTails(notes, visibility, song, pos, killswitch)
         self.renderFrets(visibility, song, controls)
-        self.renderNotes(visibility, song, pos)
+        self.renderNotes(notes, visibility, song, pos)
         self.renderHitGlow()
         self.renderHitTrails(controls)
-        self.renderFlames(song, pos)    #MFH - only when freestyle inactive!
+        self.renderFlames(notes, song, pos)    #MFH - only when freestyle inactive!
 
     def controlsMatchNotes(self, controls, notes):
         # no notes?

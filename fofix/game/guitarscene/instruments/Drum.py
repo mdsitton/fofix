@@ -75,10 +75,6 @@ class Drum(Instrument):
 
         self.matchingNotes = None
 
-        #MFH - I do not understand fully how the handicap scorecard works at the moment, nor do I have the time to figure it out.
-        #... so for now, I'm just writing some extra code here for the early hitwindow size handicap.
-        self.earlyHitWindowSizeFactor = 0.5
-
         self.strings        = 4
         self.strings2       = 5
         self.playedSound  = [True, True, True, True, True]
@@ -262,11 +258,11 @@ class Drum(Instrument):
 
 
     def render(self, visibility, song, pos, controls, killswitch):
-
+        notes = self.getRequiredNotesForRender(song, pos)
         self.renderFrets(visibility, song, controls)
-        self.renderOpenNotes(visibility, song, pos)
-        self.renderNotes(visibility, song, pos)
-        self.renderFlames(song, pos)
+        self.renderOpenNotes(notes, visibility, song, pos)
+        self.renderNotes(notes, visibility, song, pos)
+        self.renderFlames(notes, song, pos)
 
 
     def playDrumSounds(self, controls, playBassDrumOnly = False):   #MFH - handles playing of drum sounds.
