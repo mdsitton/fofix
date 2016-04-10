@@ -2609,6 +2609,7 @@ def getAvailableSongs(engine, library = DEFAULT_LIBRARY, includeTutorials = Fals
         songs.append(SongInfo(engine.resource.fileName(library, name, "song.ini", writable = True), library))
 
     songs = [song for song in songs if not song.artist == '=FOLDER=']
+    songs.sort(lambda a, b: cmp(a.name.lower(), b.name.lower())) 
 
     instrument = engine.config.get("game", "songlist_instrument")
     theInstrumentDiff = instrumentDiff[instrument]
