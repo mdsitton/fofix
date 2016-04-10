@@ -1851,6 +1851,10 @@ class Song(object):
         if self.engine.audioSpeedFactor != 1.0:
             self.setSpeed(self.engine.audioSpeedFactor)
 
+        #self.tempoEventTrack.songLength =
+
+        self.tempoEventTrack.markBars()
+
     @property
     def length(self):
         length = 0
@@ -2461,6 +2465,7 @@ class MidiReader(midi.MidiOutStream):
     #and then write an iteration routine to go through whatever track / difficulty is being played in GuitarScene
     #to find these markers and count the notes and add a new text event containing each solo's note count
     def text(self, text):
+        print text
         if text.find("GNMIDI") < 0:   #to filter out the midi class illegal usage / trial timeout messages
             #MFH - if sequence name is PART VOCALS then look for text event lyrics
             if self.vocalTrack:
@@ -3189,7 +3194,7 @@ def getSortingTitles(engine, songList = []):
 
 
 def getAvailableTitles(engine, library = DEFAULT_LIBRARY):
-    
+
     if library == None:
         return []
 

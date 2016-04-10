@@ -216,8 +216,6 @@ class GuitarScene(Scene):
             instrument.currentBpm = Song.DEFAULT_BPM
             instrument.setBPM(instrument.currentBpm)
 
-        self.song.tempoEventTrack.markBars()
-
         #akedrou - moved this to the part where it loads notes...
         for i in range(self.numOfPlayers):
             #MFH - should only be done the first time.
