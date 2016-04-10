@@ -36,7 +36,6 @@ import numpy as np
 
 from fofix.game.guitarscene.instruments.Instrument import Instrument
 from fofix.game.Song import Note, Tempo
-from fofix.core.Image import draw3Dtex
 from fofix.core.Mesh import Mesh
 from fofix.game import Song
 from fofix.core import cmgl
@@ -69,8 +68,6 @@ class Guitar(Instrument):
 
         self.fretActivity   = [0.0] * self.strings
 
-        self.drumFretButtons = None
-
         #myfingershurt:
         self.hopoStyle        = self.engine.config.get("game", "hopo_system")
         self.gh2sloppy        = self.engine.config.get("game", "gh2_sloppy")
@@ -101,35 +98,6 @@ class Guitar(Instrument):
         self.loadImages()
 
         self.rockLevel = 0.0
-
-    def renderFrets(self, visibility, song, controls):
-        w = self.boardWidth / self.strings
-        size = (.22, .22)
-        v = 1.0 - visibility
-
-        glEnable(GL_DEPTH_TEST)
-
-        for n in range(self.strings2):
-            keyNumb = n
-            c = list(self.fretColors[keyNumb])
-
-            y = v / 6
-            x = (self.strings / 2 - n) * w
-
-            fretColor = (1,1,1,1)
-            size = (self.boardWidth / self.strings / 2, self.boardWidth / self.strings / 2.4)
-            texSize = (n / self.lanenumber, n / self.lanenumber + 1 / self.lanenumber)
-
-            texY = (0.0, 1.0 / self.fretImgColNumber)#fret normal guitar/bass/drums
-
-            if controls.getState(self.keys[n]) or controls.getState(self.keys[n+5]):#fret press
-                texY = (1.0 / self.fretImgColNumber, 2.0 / self.fretImgColNumber)
-
-            draw3Dtex(self.fretButtons, vertex = (size[0],size[1],-size[0],-size[1]), texcoord = (texSize[0], texY[0], texSize[1], texY[1]),
-                                    coord = (x,v,0), multiples = True,color = fretColor, depth = True)
-
-        glDisable(GL_DEPTH_TEST)
-
 
     def render(self, visibility, song, pos, controls, killswitch):
         notes = self.getRequiredNotesForRender(song, pos)

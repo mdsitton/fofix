@@ -94,8 +94,6 @@ class Drum(Instrument):
         #myfingershurt:
         self.hopoStyle = 0
 
-        self.drumFretButtons = None
-
         #blazingamer
         self.opencolor = self.fretColors[5]
         self.rockLevel = 0.0
@@ -148,10 +146,7 @@ class Drum(Instrument):
 
         get = lambda file: self.checkPath("frets", file)
 
-        if engine.loadImgDrawing(self, "fretButtons", os.path.join("themes",themename, "frets", "drum", "fretbuttons.png")):
-            self.drumFretButtons = True
-        elif engine.loadImgDrawing(self, "fretButtons", os.path.join("themes",themename, "frets", "fretbuttons.png")):
-            self.drumFretButtons = None
+        engine.loadImgDrawing(self, "fretButtons", os.path.join("themes",themename, "frets", "drum", "fretbuttons.png"))
 
 
     def renderNote(self, length, sustain, color, tailOnly = False, isTappable = False, fret = 0, spNote = False, isOpen = False, spAct = False):
@@ -177,131 +172,12 @@ class Drum(Instrument):
         draw3Dtex(noteImage, vertex = vtx, texcoord = texCoord,
                               scale = (1,1,1), rot = (self.camAngle,1,0,0), multiples = False, color = color)
 
-
-    def renderFrets(self, visibility, song, controls):
-        w = self.boardWidth / self.strings
-        size = (.22, .22)
-        v = 1.0 - visibility
-
-        glEnable(GL_DEPTH_TEST)
-
-        for n in range(self.strings2):
-            if n == 4:
-                keyNumb = 0
-            else:
-                keyNumb = n + 1
-            f = self.drumsHeldDown[keyNumb]/200.0
-            pressed = self.drumsHeldDown[keyNumb]
-
-            if n == 3: #Set colors of frets
-                c = list(self.fretColors[0])
-            elif not n == 4:
-                c = list(self.fretColors[n + 1])
-
-            if n == 4:
-                y = v + f / 6
-                x = 0
-            else:
-                y = v / 6
-                x = (self.strings / 2 - .5 - n) * w
-
-            if n == 4: #Weirdpeople - so the drum bass fret can be seen with 2d frets
-                glDisable(GL_DEPTH_TEST)
-                size = (self.boardWidth/2, self.boardWidth/self.strings/2.4)
-                texSize = (0.0,1.0)
-            else:
-                size = (self.boardWidth / self.strings / 2, self.boardWidth / self.strings / 2.4)
-                texSize = (n / self.lanenumber, n / self.lanenumber + 1 / self.lanenumber)
-
-            fretColor = (1,1,1,1)
-
-            if self.drumFretButtons == None:
-                if n == 4:
-                    continue
-                whichFret = n+1
-                if whichFret == 4:
-                    whichFret = 0
-                    #reversing fret 0 since it's angled in Rock Band
-                    texSize = (whichFret/5.0+0.2,whichFret/5.0)
-                else:
-                    texSize = (whichFret/5.0,whichFret/5.0+0.2)
-
-                texY = (0.0,1.0/3.0)
-                if pressed:
-                    texY = (1.0/3.0,2.0/3.0)
-                if self.hit[n]: #Currently broken
-                    texY = (2.0/3.0,1.0)
-
-            else:
-                if controls.getState(self.keys[n]) or controls.getState(self.keys[n+5]) or pressed: #pressed
-                    if n == 4: #bass drum
-                        texY = (3.0 / self.fretImgColNumber, 4.0 / self.fretImgColNumber)
-                    else:
-                        texY = (2.0 / self.fretImgColNumber, 3.0 / self.fretImgColNumber)
-
-                elif self.hit[n]: #being hit - Currently broken
-                    if n == 4: #bass drum
-                        texY = (5.0 / self.fretImgColNumber, 1.0)
-                    else:
-                        texY = (4.0 / self.fretImgColNumber, 5.0 / self.fretImgColNumber)
-
-                else: #nothing being pressed or hit
-                    if n == 4: #bass drum
-                        texY = (1.0 / self.fretImgColNumber, 2.0 / self.fretImgColNumber)
-                    else:
-                        texY = (0.0, 1.0 / self.fretImgColNumber)
-
-            draw3Dtex(self.fretButtons, vertex = (size[0],size[1],-size[0],-size[1]), texcoord = (texSize[0], texY[0], texSize[1], texY[1]),
-                                    coord = (x,v,0), multiples = True,color = fretColor, depth = True)
-
-        glDisable(GL_DEPTH_TEST)
-
-
     def render(self, visibility, song, pos, controls, killswitch):
         notes = self.getRequiredNotesForRender(song, pos)
         self.renderFrets(visibility, song, controls)
         self.renderOpenNotes(notes, visibility, song, pos)
         self.renderNotes(notes, visibility, song, pos)
         self.renderFlames(notes, song, pos)
-
-
-    def playDrumSounds(self, controls, playBassDrumOnly = False):   #MFH - handles playing of drum sounds.
-        #Returns list of drums that were just hit (including logic for detecting a held bass pedal)
-        #pass playBassDrumOnly = True (optional paramater) to only play the bass drum sound, but still
-        #  return a list of drums just hit (intelligently play the bass drum if it's held down during gameplay)
-        drumsJustHit = [False, False, False, False, False]
-
-        for i in range (5):
-            if controls.getState(self.keys[i]) or controls.getState(self.keys[5+i]):
-                if i == 0:
-                    if self.playedSound[i] == False:  #MFH - gotta check if bass drum pedal is just held down!
-                        self.engine.data.bassDrumSound.play()
-                        self.playedSound[i] = True
-                        drumsJustHit[0] = True
-                        if self.fretboardHop < 0.04:
-                            self.fretboardHop = 0.04  #stump
-                if i == 1:
-                    if not playBassDrumOnly and self.playedSound[i] == False:
-                        self.engine.data.T1DrumSound.play()
-                    self.playedSound[i] = True
-                    drumsJustHit[i] = True
-                if i == 2:
-                    if not playBassDrumOnly and self.playedSound[i] == False:
-                        self.engine.data.T2DrumSound.play()
-                    self.playedSound[i] = True
-                    drumsJustHit[i] = True
-                if i == 3:
-                    if not playBassDrumOnly and self.playedSound[i] == False:
-                        self.engine.data.T3DrumSound.play()
-                    self.playedSound[i] = True
-                    drumsJustHit[i] = True
-                if i == 4:   #MFH - must actually activate starpower!
-                    if not playBassDrumOnly and self.playedSound[i] == False:
-                        self.engine.data.CDrumSound.play()
-                    self.playedSound[i] = True
-                    drumsJustHit[i] = True
-
-        return drumsJustHit
 
 
     def startPick(self, song, pos, controls, hopo = False):

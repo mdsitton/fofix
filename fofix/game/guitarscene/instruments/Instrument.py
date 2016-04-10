@@ -720,7 +720,75 @@ class Instrument(object):
             glPopMatrix()
 
     def renderFrets(self, visibility, song, controls):
-        pass
+        w = self.boardWidth / self.strings
+        size = (.22, .22)
+        v = 1.0 - visibility
+
+        if self.isDrum:
+            self.strings2 = self.strings + 1  # +1 is for the bass drum fret
+        else:
+            self.strings2 = self.strings
+
+        # death_au:
+        # if we leave the depth test enabled, it thinks that the bass drum images
+        # are under the other frets and openGL culls them. So I just leave it disabled
+        glEnable(GL_DEPTH_TEST)
+
+        for n in range(self.strings2):
+
+            if self.isDrum:  # Drum related fret press things
+                if n == 4:
+                    keyNumb = 0
+                    x = 0 # bass fret x position
+                    glDisable(GL_DEPTH_TEST)
+                else:
+                    keyNumb = n + 1
+                    x = (self.strings / 2 - .5 - n) * w # drum fret x position
+
+                pressed = self.drumsHeldDown[keyNumb]
+
+            else:
+                pressed = None  # to make sure guitar doesnt crash
+                x = (self.strings / 2 - n) * w # guitar fret x position
+
+            fretColor = (1, 1, 1, 1)
+
+            if self.isDrum and n == 4:
+                size = (self.boardWidth / 2, self.boardWidth / self.strings / 2.4)
+                texSize = (0.0, 1.0)
+                texY = (1.0 / self.fretImgColNumber, 2.0 / self.fretImgColNumber)
+            else:
+                size = (self.boardWidth / self.strings / 2, self.boardWidth / self.strings / 2.4)
+                texSize = (n / self.lanenumber, n / self.lanenumber + 1 / self.lanenumber)
+
+            if controls.getState(self.keys[n]) or controls.getState(self.keys[n+5]) or pressed: # fret press
+                if self.isDrum:
+                    if n == 4: # bass drum
+                        texY = (3.0 / self.fretImgColNumber, 4.0 / self.fretImgColNumber)
+                    else:
+                        texY = (2.0 / self.fretImgColNumber, 3.0 / self.fretImgColNumber)
+                else: # guitar / bass
+                    texY = (1.0 / self.fretImgColNumber, 2.0 / self.fretImgColNumber)
+
+            elif self.hit[n]: # frets on note hit
+                if self.isDrum:
+                    if n == 4: # bass drum
+                        texY = (5.0 / self.fretImgColNumber, 1.0)
+                    else:
+                        texY = (4.0 / self.fretImgColNumber, 5.0 / self.fretImgColNumber)
+                else: # guitar / bass
+                    texY = (2.0 / self.fretImgColNumber, 1.0)
+            else: # nothing being pressed or hit
+                if self.isDrum and n == 4: # bass drum
+                    texY = (1.0 / self.fretImgColNumber, 2.0 / self.fretImgColNumber)
+                else:
+                    texY = (0.0, 1.0 / self.fretImgColNumber)  # fret normal guitar/bass/drums
+
+            draw3Dtex(self.fretButtons, vertex=(size[0], size[1], -size[0], -size[1]),
+                texcoord=(texSize[0], texY[0], texSize[1], texY[1]),
+                coord=(x, v, 0), multiples=True, color=fretColor, depth=True)
+
+        glDisable(GL_DEPTH_TEST)
 
     def renderHitGlow(self):
         for n in range(self.strings2):
