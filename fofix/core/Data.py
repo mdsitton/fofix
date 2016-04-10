@@ -63,7 +63,7 @@ class Data(object):
         self.logImageNotFound = Config.get("log", "log_image_not_found")
 
         self.resource = resource
-        self.svg      = svg
+        self.img      = svg
 
         self.sfxVolume    = Config.get("audio", "SFX_volume")
         self.crowdVolume  = Config.get("audio", "crowd_volume")
@@ -408,7 +408,7 @@ class Data(object):
             if os.path.exists(fileName1):
                 if openImage == True:
                     try:
-                        imgDrawing = ImgDrawing(self.svg, fileName1)
+                        imgDrawing = ImgDrawing(self.img, fileName1)
                         return imgDrawing
                     except IOError:
                         Log.warn("Unable to load image file: %s" % fileName1)
@@ -423,7 +423,7 @@ class Data(object):
                 if openImage == True:
                     for i in range(len(files)):
                         try:
-                            imgDrawing = ImgDrawing(self.svg, files[i])
+                            imgDrawing = ImgDrawing(self.img, files[i])
                             return imgDrawing
                         except IOError:
                             Log.warn("Unable to load image file: %s" % files[i])

@@ -104,9 +104,6 @@ class Instrument(object):
         #Get theme
         self.theme = self.engine.data.theme
 
-        #blazingamer
-        self.nstype = self.engine.config.get("game", "nstype")                  # neck style
-
         self.speed = self.engine.config.get("coffee", "neckSpeed") * 0.01
 
         self.boardScaleX    = self.boardWidth/3.0

@@ -35,7 +35,7 @@ from fofix.core import cmgl
 #stump: the last few stubs of DummyAmanith.py are inlined here since this
 # is the only place in the whole program that uses it now that we've pruned
 # the dead SVG code.
-class SvgContext(object):
+class ImgContext(object):
     def __init__(self, geometry):
         self.doSize(geometry)
         glMatrixMode(GL_MODELVIEW)
@@ -137,15 +137,9 @@ def draw3Dtex(image, vertex, texcoord, coord = None, scale = None, rot = None, c
         glBlendFunc(GL_SRC_ALPHA, GL_ONE)
 
     if len(color) == 4:
-        col_array  = np.array([[color[0],color[1],color[2], color[3]],
-                            [color[0],color[1],color[2], color[3]],
-                            [color[0],color[1],color[2], color[3]],
-                            [color[0],color[1],color[2], color[3]]], dtype=np.float32)
+        col_array  = np.array([[color[0],color[1],color[2], color[3]]] * 4, dtype=np.float32)
     else:
-        col_array  = np.array([[color[0],color[1],color[2], 1],
-                            [color[0],color[1],color[2], 1],
-                            [color[0],color[1],color[2], 1],
-                            [color[0],color[1],color[2], 1]], dtype=np.float32)
+        col_array  = np.array([[color[0],color[1],color[2], 1]] * 4, dtype=np.float32)
 
     glEnable(GL_TEXTURE_2D)
     image.texture.bind()
@@ -154,11 +148,11 @@ def draw3Dtex(image, vertex, texcoord, coord = None, scale = None, rot = None, c
         glPushMatrix()
 
     if coord != None:
-        glTranslate(coord[0], coord[1], coord[2])
+        glTranslate(*coord)
     if rot != None:
-        glRotate(rot[0], rot[1], rot[2], rot[3])
+        glRotate(*rot)
     if scale != None:
-        glScalef(scale[0], scale[1], scale[2])
+        glScalef(*scale)
 
     if depth == True:
         glDepthMask(1)

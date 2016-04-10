@@ -30,9 +30,9 @@ from OpenGL.GLU import *
 
 class SvgTest(unittest.TestCase):
     def testRendering(self):
-        self.svg.transform.translate(256, 256)
-        self.svg.transform.rotate(3.141592)
-        self.svg.draw()
+        self.img.transform.translate(256, 256)
+        self.img.transform.rotate(3.141592)
+        self.img.draw()
         self.e.video.flip()
 
     def testRenderToTexture(self):
@@ -40,13 +40,13 @@ class SvgTest(unittest.TestCase):
         fullwidth, fullheight = 512, 512
         width, height = int(fullwidth / scale), int(fullheight / scale)
         t = Texture()
-        self.e.svg.setProjection((0, 0, fullwidth, fullheight))
+        self.e.img.setProjection((0, 0, fullwidth, fullheight))
 
         glViewport(0, 0, width, height)
         glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        self.svg.transform.translate(width * scale / 2, height * scale / 2)
-        self.svg.transform.rotate(3.141592)
-        self.svg.draw()
+        self.img.transform.translate(width * scale / 2, height * scale / 2)
+        self.img.transform.rotate(3.141592)
+        self.img.draw()
 
         glViewport(0, 0, fullwidth, fullheight)
         glMatrixMode(GL_PROJECTION)
@@ -81,7 +81,7 @@ class SvgTest(unittest.TestCase):
         self.e = GameEngine(config)
         self.e.loadImgDrawing(self, "svg", "mfhlogo.png")
 
-        while not self.svg:
+        while not self.img:
             self.e.run()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

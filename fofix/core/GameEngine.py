@@ -45,7 +45,7 @@ from fofix.core.View import View
 from fofix.core.Input import Input, KeyListener, SystemEventListener
 from fofix.core.Resource import Resource
 from fofix.core.Data import Data
-from fofix.core.Image import SvgContext, ImgDrawing
+from fofix.core.Image import ImgContext, ImgDrawing
 from fofix.core.Language import _
 from fofix.core.Theme import Theme
 from fofix.core.Image import drawImage
@@ -171,7 +171,7 @@ class GameEngine(SystemEventListener):
         self.clock = FpsTimer()
         self.tickDelta = 0
         self.task = TaskEngine(self)
-        
+
         # Compatiblity task management
         self.addTask = self.task.addTask
         self.removeTask = self.task.removeTask
@@ -231,7 +231,7 @@ class GameEngine(SystemEventListener):
             self.config.set("video", "resolution", "800x600")
 
         geometry = (0, 0, width, height)
-        self.svg = SvgContext(geometry)
+        self.img = ImgContext(geometry)
 
         self.startupMessages   = self.video.error
         self.input     = Input()
@@ -253,7 +253,7 @@ class GameEngine(SystemEventListener):
 
         self.task.addTask(self.resource, synced = False)
 
-        self.data = Data(self.resource, self.svg)
+        self.data = Data(self.resource, self.img)
 
         self.theme = Theme(themepath, themename)
 
@@ -319,7 +319,7 @@ class GameEngine(SystemEventListener):
     def restartRequested(self):
         """Restart the game."""
         self.quit()
-        
+
     def restart(self):
         if not self.restartRequest:
             self.restartRequest = True
@@ -335,7 +335,7 @@ class GameEngine(SystemEventListener):
         geometry = (0, 0, size[0], size[1])
 
         self.view.setGeometry(geometry)
-        self.svg.doSize(geometry)
+        self.img.doSize(geometry)
 
     def startWorld(self, players, maxplayers = None, allowGuitar = True, allowDrum = True):
         self.world = World(self, allowGuitar, allowDrum)
@@ -428,7 +428,7 @@ class GameEngine(SystemEventListener):
         return done
 
     def clearScreen(self):
-        self.svg.clear(*self.theme.backgroundColor)
+        self.img.clear(*self.theme.backgroundColor)
 
     def fadeScreen(self, v):
         """
