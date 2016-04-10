@@ -707,7 +707,6 @@ class Instrument(object):
             if self.isDrum and n == 4:
                 size = (self.boardWidth / 2, self.boardWidth / self.strings / 2.4)
                 texSize = (0.0, 1.0)
-                texY = (1.0 / self.fretImgColNumber, 2.0 / self.fretImgColNumber)
             else:
                 size = (self.boardWidth / self.strings / 2, self.boardWidth / self.strings / 2.4)
                 texSize = (n / self.lanenumber, n / self.lanenumber + 1 / self.lanenumber)
@@ -729,6 +728,7 @@ class Instrument(object):
                         texY = (4.0 / self.fretImgColNumber, 5.0 / self.fretImgColNumber)
                 else: # guitar / bass
                     texY = (2.0 / self.fretImgColNumber, 1.0)
+
             else: # nothing being pressed or hit
                 if self.isDrum and n == 4: # bass drum
                     texY = (1.0 / self.fretImgColNumber, 2.0 / self.fretImgColNumber)
