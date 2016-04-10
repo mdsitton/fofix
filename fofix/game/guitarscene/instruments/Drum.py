@@ -218,6 +218,18 @@ class Drum(Instrument):
 
         for time, note in self.playedNotes:
             if pos > time + note.length:
-                return False
+                self.endPick(pos)
 
-        return True
+        missedNotes = self.getMissedNotes(song, pos, catchup = True)
+        if self.paused:
+            missedNotes = []
+
+        if not self.processedFirstNoteYet and not self.playedNotes and len(missedNotes) > 0:
+
+            self.processedFirstNoteYet = True
+            self.hopoLast = -1
+
+            self.hopoActive = 0
+            self.wasLastNoteHopod = False
+            self.sameNoteHopoString = False
+            self.hopoProblemNoteNum = -1

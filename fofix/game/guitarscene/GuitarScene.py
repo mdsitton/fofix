@@ -130,7 +130,6 @@ class GuitarScene(Scene):
         self.numOfPlayers = len(self.playerList)
 
         self.timeLeft = None
-        self.processedFirstNoteYet = False
 
         self.lastPickPos      = [None for i in self.playerList]
         self.keyBurstTimeout  = [None for i in self.playerList]
@@ -146,8 +145,6 @@ class GuitarScene(Scene):
         #Get theme
         self.themeName = self.engine.data.themeLabel
 
-        self.notesMissed = [False for i in self.playerList]
-        self.notesHit = [False for i in self.playerList]
         self.lessHit = False
         self.minBase = 400
         self.pluBase = 15
@@ -452,11 +449,8 @@ class GuitarScene(Scene):
 
         if self.instruments[num].startPick(self.song, self.songTime, self.controls):
             self.song.setInstrumentVolume(1.0, self.playerList[num].part)
-            self.notesHit[num] = True
-
         else:
             self.song.setInstrumentVolume(0.0, self.playerList[num].part)
-            self.notesMissed[num] = True
 
     def handlePick(self, playerNum, hopo = False, pullOff = False):
         num = playerNum
@@ -505,10 +499,7 @@ class GuitarScene(Scene):
             self.instruments[num].hopoProblemNoteNum = -1
 
         if self.instruments[num].startPick3(self.song, pos, self.controls, hopo):
-            self.processedFirstNoteYet = True
             self.song.setInstrumentVolume(1.0, self.playerList[num].part)
-
-            self.notesHit[num] = True #QQstarS:Set [0] to [i]
 
         else:
             ApplyPenalty = True
@@ -545,8 +536,6 @@ class GuitarScene(Scene):
                 self.instruments[num].hopoProblemNoteNum = -1
                 self.instruments[num].hopoLast = -1
                 self.song.setInstrumentVolume(0.0, self.playerList[num].part)
-
-                self.notesMissed[num] = True #QQstarS:Set [0] to [i]
 
     def keyPressed(self, key, unicode, control=None, pullOff = False):
 
@@ -674,26 +663,7 @@ class GuitarScene(Scene):
                 playerNum = i
 
                 instrument.camAngle = -degrees(atan(abs(self.camera.origin[2] - self.camera.target[2]) / abs(self.camera.origin[1] - self.camera.target[1])))
-
-                if not instrument.run(ticks, self.songTime, self.song, self.controls):
-                    # done playing the current notes
-                    self.endPick(i)
-
-                missedNotes = instrument.getMissedNotes(self.song, self.songTime, catchup = True)
-                if instrument.paused:
-                    missedNotes = []
-
-                if (not self.processedFirstNoteYet) and not instrument.playedNotes and len(missedNotes) > 0:
-                    if not self.processedFirstNoteYet:
-                        self.notesMissed[i] = True
-                    self.processedFirstNoteYet = True
-                    instrument.hopoLast = -1
-                    self.song.setInstrumentVolume(0.0, self.playerList[playerNum].part)
-
-                    instrument.hopoActive = 0
-                    instrument.wasLastNoteHopod = False
-                    instrument.sameNoteHopoString = False
-                    instrument.hopoProblemNoteNum = -1
+                instrument.run(ticks, self.songTime, self.song, self.controls)
 
             if self.countdown > 0 and self.countdownOK: #MFH won't start song playing if you failed or pause
                 self.countdown = max(self.countdown - ticks / self.song.period, 0)

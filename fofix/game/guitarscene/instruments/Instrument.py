@@ -64,6 +64,7 @@ class Instrument(object):
 
         self.sameNoteHopoString = False
         self.hopoProblemNoteNum = -1
+        self.processedFirstNoteYet = False
 
         self.currentBpm     = 120.0   #MFH - need a default 120BPM to be set in case a custom song has no tempo events.
         self.currentPeriod  = 60000.0 / self.currentBpm
