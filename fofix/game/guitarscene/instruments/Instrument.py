@@ -560,19 +560,26 @@ class Instrument(object):
         if tailOnly:
             return
 
-        noteImage = self.noteButtons
-
-        tailOnly = True
-
         y = 0
-        if isTappable:
-            y += 1
+
+
+        if self.isDrum:
+            if isOpen:
+                vtx = self.openVtx
+                texCoord = self.noteTexCoord[y]
+            else:
+                fret -= 1
+        else:
+            if isTappable:
+                y += 1
+            vtx = self.noteVtx
 
         noteImage = self.noteButtons
+        vtx = self.noteVtx
         texCoord = self.noteTexCoord[y][fret]
-
-        draw3Dtex(noteImage, vertex = self.noteVtx, texcoord = texCoord,
-                              scale = (1,1,1), rot = (self.camAngle ,1,0,0), multiples = False, color = color)
+        
+        draw3Dtex(noteImage, vertex = vtx, texcoord = texCoord,
+                              scale = (1,1,1), rot = (self.camAngle,1,0,0), multiples = False, color = color)
 
 
     def renderNotes(self, notes, visibility, song, pos):

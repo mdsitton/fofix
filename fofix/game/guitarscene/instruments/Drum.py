@@ -146,37 +146,12 @@ class Drum(Instrument):
 
         engine.loadImgDrawing(self, "fretButtons", os.path.join("themes",themename, "frets", "drum", "fretbuttons.png"))
 
-
-    def renderNote(self, length, sustain, color, tailOnly = False, isTappable = False, fret = 0, spNote = False, isOpen = False, spAct = False):
-
-        if tailOnly:
-            return
-
-        tailOnly = True
-
-        y = 0
-
-        if isOpen:
-            vtx = self.openVtx
-            if not noteImage:
-                noteImage = self.noteButtons
-                texCoord = self.noteTexCoord[y]
-        else:
-            fret -= 1
-            vtx = self.noteVtx
-            noteImage = self.noteButtons
-            texCoord = self.noteTexCoord[y][fret]
-
-        draw3Dtex(noteImage, vertex = vtx, texcoord = texCoord,
-                              scale = (1,1,1), rot = (self.camAngle,1,0,0), multiples = False, color = color)
-
     def render(self, visibility, song, pos, controls, killswitch):
         notes = self.getRequiredNotesForRender(song, pos)
         self.renderFrets(visibility, song, controls)
         self.renderOpenNotes(notes, visibility, song, pos)
         self.renderNotes(notes, visibility, song, pos)
         self.renderFlames(notes, song, pos)
-
 
     def startPick(self, song, pos, controls, hopo = False):
         if not song:
