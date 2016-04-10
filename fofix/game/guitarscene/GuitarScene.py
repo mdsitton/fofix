@@ -713,7 +713,7 @@ class GuitarScene(Scene):
                     text = _("FPS: %.2f" % self.engine.fpsEstimate)
                     w, h = font.getStringSize(text, scale = 0.00140)
                     x = 0.85; y = 0.055
-                    font.render(text, (x, y] - h/2), (1,0,0), 0.00140)
+                    font.render(text, (x, y - h/2), (1,0,0), 0.00140)
 
                 #MFH - Get Ready to Rock & countdown
                 if not self.pause:
