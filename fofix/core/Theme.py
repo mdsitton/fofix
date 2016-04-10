@@ -47,7 +47,7 @@ DRUMTYPES   = [2, 3]
 MICTYPES    = [5]
 
 defaultDict = {}
-classNames = {'themeLobby': lambda x: ThemeLobby(x), 'partDiff': lambda x: ThemeParts(x)}
+classNames = {'partDiff': lambda x: ThemeParts(x)}
 
 def halign(value, default='center'):
     try:
@@ -161,7 +161,7 @@ class Theme(Task):
         #since the original Frets on Fire.  What glow_color allows you to do is set it so
         #the glow is either the color of the fret it's over or it can be the color the image
         #actually is (if the image is white then no matter what key is hit the glow will be white)
-        
+
         self.hitGlowColor   = get("hit_glow_color", str, "frets")
         if not self.hitGlowColor == "frets":
             self.hitGlowColor = hexToColor(self.hitGlowColor)
@@ -332,40 +332,10 @@ class Theme(Task):
         self.library_selected_colorVar     = get("library_selected_color",     "color", "#FFBF00")
         self.song_rb2_diff_colorVar        = get("song_rb2_diff_color",        "color", "#FFBF00")
 
-        #These determine the position of the version tag on the main menu.
-        self.versiontagScale = get("versiontagScale", float, 0.5)
-        self.versiontagposX = get("versiontagposX", float, 0.5)
-        self.versiontagposY = get("versiontagposY", float, 0.05)
-
-        #pause menu and fail menu positions and text colors
-        self.pause_bkg_pos           = get("pause_bkg",                str, "0.5,0.5,1.0,1.0").split(",")
-        self.pause_text_xPos         = get("pause_text_x",           float)
-        self.pause_text_yPos         = get("pause_text_y",           float)
-        self.pause_text_colorVar     = get("pause_text_color",     "color", "#FFFFFF")
-        self.pause_selected_colorVar = get("pause_selected_color", "color", "#FFBF00")
-
-        self.fail_completed_colorVar = get("fail_completed_color", "color", "#FFFFFF")
-        self.fail_text_colorVar      = get("fail_text_color",      "color", "#FFFFFF")
-        self.fail_selected_colorVar  = get("fail_selected_color",  "color", "#FFBF00")
-
-        self.fail_bkg_pos       = get("fail_bkg",          str, "0.5,0.5,1.0,1.0").split(",")
-        self.fail_text_xPos     = get("fail_text_x",     float)
-        self.fail_text_yPos     = get("fail_text_y",     float)
-        self.fail_songname_xPos = get("fail_songname_x", float,  0.5)
-        self.fail_songname_yPos = get("fail_songname_y", float, 0.35)
-
-        self.opt_bkg_size          = get("opt_bkg",                str, "0.5,0.5,1.0,1.0").split(",")
-        self.opt_text_xPos         = get("opt_text_x",           float)
-        self.opt_text_yPos         = get("opt_text_y",           float)
-        self.opt_text_colorVar     = get("opt_text_color",     "color",         "#FFFFFF")
-        self.opt_selected_colorVar = get("opt_selected_color", "color",         "#FFBF00")
-
         #main menu system
         self.menuPos = [get("menu_x", float, 0.2), get("menu_y", float, 0.8)]
-        self.menuRB  = get("rbmenu", bool, False)
         self.main_menu_scaleVar    = get("main_menu_scale",    float, 0.5)
         self.main_menu_vspacingVar = get("main_menu_vspacing", float, .09)
-        self.use_solo_submenu      = get("use_solo_submenu",   bool, True)
 
         #Settings option scale
         self.settingsmenuScale = get("settings_menu_scale",    float, 0.002)
@@ -386,7 +356,6 @@ class Theme(Task):
         self.sub_menu_yVar    = get("sub_menu_y", float, None)
         #self.songback         = get("songback")
 
-        self.versiontag = get("versiontag", bool, False)
 
         #these are the little help messages at the bottom of the
         #options screen when you hover over an item
@@ -398,152 +367,7 @@ class Theme(Task):
         self.menuTipTextScrollMode = get("menu_tip_text_scroll_mode", int, 0)
         self.menuTipTextDisplay = get("menu_tip_text_display", bool, False)
 
-        #Lobby
-        self.controlActivateX        = get("control_activate_x",         float, 0.645)
-        self.controlActivateSelectX  = get("control_activate_select_x",  float, 0.5)
-        self.controlActivatePartX    = get("control_activate_part_x",    float, 0.41)
-        self.controlActivateY        = get("control_activate_y",         float, 0.18)
-        self.controlActivateScale    = get("control_activate_scale",     float, 0.0018)
-        self.controlActivateSpace    = get("control_activate_part_size", float, 22.000)
-        self.controlActivatePartSize = get("control_activate_space",     float, 0.045)
-        self.controlActivateFont     = get("control_activate_font",        str, "font")
-        self.controlDescriptionX     = get("control_description_x",      float, 0.5)
-        self.controlDescriptionY     = get("control_description_y",      float, 0.13)
-        self.controlDescriptionScale = get("control_description_scale",  float, 0.002)
-        self.controlDescriptionFont  = get("control_description_font",     str, "font")
-        self.controlCheckX           = get("control_description_scale", float, 0.002)
-        self.controlCheckY           = get("control_check_x",           float, 0.16)
-        self.controlCheckTextY       = get("control_check_text_y",      float, 0.61)
-        self.controlCheckPartMult    = get("control_check_part_mult",   float, 2.8)
-        self.controlCheckScale       = get("control_check_space",       float, 0.23)
-        self.controlCheckSpace       = get("control_check_scale",       float, 0.0018)
-        self.controlCheckFont        = get("control_check_font",          str, "font")
-
-        self.lobbyMode           = get("lobby_mode", int, 0)
-        self.lobbyPreviewX       = get("lobby_preview_x", float, 0.7)
-        self.lobbyPreviewY       = get("lobby_preview_y", float, 0.0)
-        self.lobbyPreviewSpacing = get("lobby_preview_spacing", float, 0.04)
-
-        self.lobbyTitleX          = get("lobby_title_x", float, 0.5)
-        self.lobbyTitleY          = get("lobby_title_y", float, 0.07)
-        self.lobbyTitleCharacterX = get("lobby_title_character_x", float, 0.26)
-        self.lobbyTitleCharacterY = get("lobby_title_character_y", float, 0.24)
-        self.lobbyTitleScale      = get("lobby_title_scale", float, 0.0024)
-        self.lobbyTitleFont       = get("lobby_title_font", str, "loadingFont")
-
-        self.lobbyAvatarX      = get("lobby_avatar_x",        float, 0.7)
-        self.lobbyAvatarY      = get("lobby_avatar_y",        float, 0.75)
-        self.lobbyAvatarScale  = get("lobby_avatar_scale",    float, 1.0)
-
-        self.lobbySelectX      = get("lobby_select_x",        float, 0.4)
-        self.lobbySelectY      = get("lobby_select_y",        float, 0.32)
-        self.lobbySelectImageX = get("lobby_select_image_x",  float, 0.255)
-        self.lobbySelectImageY = get("lobby_select_image_y",  float, 0.335)
-        self.lobbySelectScale  = get("lobby_select_scale",    float, 0.0018)
-        self.lobbySelectSpace  = get("lobby_select_space",    float, 0.04)
-        self.lobbySelectFont   = get("lobby_select_font",       str, "font")
-        self.lobbySelectLength = get("lobby_select_length",     int, 5)
-
-        self.lobbyTitleColor   = get("lobby_title_color",   "color", "#FFFFFF")
-        self.lobbyInfoColor    = get("lobby_info_color",    "color", "#FFFFFF")
-        self.lobbyFontColor    = get("lobby_font_color",    "color", "#FFFFFF")
-        self.lobbyPlayerColor  = get("lobby_player_color",  "color", "#FFFFFF")
-        self.lobbySelectColor  = get("lobby_select_color",  "color", "#FFBF00")
-        self.lobbyDisableColor = get("lobby_disable_color", "color", "#666666")
-
-        self.characterCreateX           = get("character_create_x",          float,   0.25)
-        self.characterCreateY           = get("character_create_y",          float,   0.15)
-        self.characterCreateHelpX       = get("character_create_help_x",     float,    0.5)
-        self.characterCreateHelpY       = get("character_create_help_y",     float,   0.73)
-        self.characterCreateScale       = get("character_create_scale",      float, 0.0018)
-        self.characterCreateSpace       = get("character_create_space",      float,  0.045)
-        self.characterCreateHelpScale   = get("character_create_help_scale", float, 0.0018)
-        self.characterCreateOptionX     = get("character_create_option_x",   float,   0.75)
-
-        self.characterCreateOptionFont  = get("character_create_option_font", str, "font")
-        self.characterCreateHelpFont    = get("character_create_help_font", str, "loadingFont")
-
-        self.characterCreateFontColor   = get("character_create_font_color", "color", "#FFFFFF")
-        self.characterCreateSelectColor = get("character_create_select_color", "color", "#FFBF00")
-        self.characterCreateHelpColor   = get("character_create_help_color", "color", "#FFFFFF")
-
-        self.avatarSelectTextX     = get("avatar_select_text_x", float, 0.44)
-        self.avatarSelectTextY     = get("avatar_select_text_y", float, 0.16)
-        self.avatarSelectTextScale = get("avatar_select_text_scale", float, 0.0027)
-
-        self.avatarSelectAvX    = get("avatar_select_avatar_x", float, 0.667)
-        self.avatarSelectAvY    = get("avatar_select_avatar_y", float, 0.5)
-
-        self.avatarSelectWheelY = get("avatar_select_wheel_y", float, 0.0)
-
-        self.avatarSelectFont   = get("avatar_select_font", str, "font")
-
-        self.lobbyPanelAvatarDimension = (get("lobbyPanelAvatarWidth", float, 200.00),
-                                          get("lobbyPanelAvatarHeight", float, 110.00))
-        self.lobbyTitleText = get("lobbyTitleText", str, "Lobby")
-        self.lobbyTitleTextPos = (get("lobbyTitleTextX", str, 0.3),
-                                  get("lobbyTitleTextY", float, 0.015))
-        self.lobbyTitleTextAlign = halign(get("lobbyTitleTextAlign", str, "CENTER"))
-        self.lobbyTitleTextScale = get("lobbyTitleTextScale", float, .001)
-        self.lobbyTitleTextFont = get("lobbyTitleTextFont", str, "font")
-
-        self.lobbySubtitleText = get("lobbySubtitleText", str, "Choose Your Character!")
-        self.lobbySubtitleTextPos = (get("lobbySubtitleTextX", float, 0.5),
-                                     get("lobbySubtitleTextY", float, 0.015))
-        self.lobbySubtitleTextScale = get("lobbySubtitleTextScale", float, .0015)
-        self.lobbySubtitleTextFont = get("lobbySubtitleTextFont", str, "font")
-        self.lobbySubtitleTextAlign = halign(get("lobbySubtitleTextAlign", str, "CENTER"))
-
-        self.lobbyOptionScale = get("lobbyOptionScale", float, .001)
-        self.lobbyOptionAlign = halign(get("lobbyOptionAlign", str, "CENTER"))
         self.lobbyOptionFont = get("lobbyOptionFont", str, "font")
-        self.lobbyOptionPos = (get("lobbyOptionX", float, .5),
-                               get("lobbyOptionY", float, .46))
-        self.lobbyOptionSpace = get("lobbyOptionSpace", float, .04)
-        self.lobbyOptionColor = get("lobbyOptionColor", "color", "#FFFFFF")
-
-        self.lobbySaveCharScale = get("lobbySaveCharScale", float, .001)
-        self.lobbySaveCharAlign = halign(get("lobbySaveCharAlign", str, "CENTER"))
-        self.lobbySaveCharFont = get("lobbySaveCharFont", str, "font")
-        self.lobbySaveCharColor = get("lobbySaveCharColor", "color", "#FFFFFF")
-
-        self.lobbyGameModePos = (get("lobbyGameModeX", float, 0.7),
-                                 get("lobbyGameModeY", float, 0.015))
-        self.lobbyGameModeScale = get("lobbyGameModeScale", float, .001)
-        self.lobbyGameModeAlign = halign(get("lobbyGameModeAlign", str, "CENTER"))
-        self.lobbyGameModeFont = get("lobbyGameModeFont", str, "font")
-        self.lobbyGameModeColor = get("lobbyGameModeColor", "color", "#FFFFFF")
-
-        self.lobbyPanelNamePos = (get("lobbyPanelNameX", float, 0.0),
-                                  get("lobbyPanelNameY", float, 0.0))
-        self.lobbyPanelNameFont = get("lobbyPanelNameFont", str, "font")
-        self.lobbyPanelNameScale = get("lobbyPanelNameScale", float, .001)
-        self.lobbyPanelNameAlign = halign(get("lobbyPanelNameAlign", str, "LEFT"), 'left')
-        self.lobbyControlPos = (get("lobbyControlX", float, .5),
-                                get("lobbyControlY", float, .375))
-        self.lobbyControlFont = get("lobbyControlFont", str, "font")
-        self.lobbyControlScale = get("lobbyControlScale", float, .0025)
-        self.lobbyControlAlign = halign(get("lobbyControlAlign", str, "CENTER"))
-        self.lobbyHeaderColor = get("lobbyHeaderColor", "color", "#FFFFFF")
-        self.lobbySelectLength = get("lobbySelectLength", int, 4)
-
-        self.lobbyPartScale = get("lobbyPartScale", float, .25)
-        self.lobbyPartPos = (get("lobbyPartX", float, .5),
-                             get("lobbyPartY", float, .52))
-        self.lobbyControlImgScale = get("lobbyControlImgScale", float, .25)
-        self.lobbyControlImgPos = (get("lobbyControlImgX", float, .5),
-                                   get("lobbyControlImgY", float, .55))
-
-        self.lobbyKeyboardImgScale = get("lobbyKeyboardImgScale", float, .1)
-        self.lobbyKeyboardImgPos = (get("lobbyKeyboardImgX", float, .8),
-                                    get("lobbyKeyboardImgY", float, .95))
-        self.lobbySelectedColor = get("lobbySelectedColor", "color", "#FFFF66")
-        self.lobbyDisabledColor = get("lobbyDisabledColor", "color", "#BBBBBB")
-        self.lobbyPanelSize = (get("lobbyPanelWidth", float, .2),
-                               get("lobbyPanelHeight", float, .8))
-        self.lobbyPanelPos = (get("lobbyPanelX", float, .04),
-                              get("lobbyPanelY", float, .1))
-        self.lobbyPanelSpacing = get("lobbyPanelSpacing", float, .24)
 
         self.partDiffTitleText = get("partDiffTitleText", str, "Select a Part and Difficulty")
         self.partDiffTitleTextPos = (get("partDiffTitleTextX", float, .5),
@@ -602,92 +426,6 @@ class Theme(Task):
         self.partDiffPanelSize = (get("partDiffPanelWidth", float,  .2),
                                   get("partDiffPanelHeight", float, .8))
 
-        #Vocal mode
-        self.vocalMeterSize = get("vocal_meter_size", float, 45.000)
-        self.vocalMeterX = get("vocal_meter_x", float, .25)
-        self.vocalMeterY = get("vocal_meter_y", float, .8)
-        self.vocalMultX  = get("vocal_mult_x", float, .28)
-        self.vocalMultY  = get("vocal_mult_y", float, .8)
-
-        self.vocalPowerX = get("vocal_power_x", float, .5)
-        self.vocalPowerY = get("vocal_power_y", float, .8)
-
-        self.vocalFillupCenterX   = get("vocal_fillup_center_x",   int, 139)
-        self.vocalFillupCenterY   = get("vocal_fillup_center_y",   int, 151)
-        self.vocalFillupInRadius  = get("vocal_fillup_in_radius",  int, 25)
-        self.vocalFillupOutRadius = get("vocal_fillup_out_radius", int, 139)
-        self.vocalFillupFactor    = get("vocal_fillup_factor",   float, 300.000)
-        self.vocalFillupColor     = get("vocal_fillup_color",  "color", "#DFDFDE")
-        self.vocalCircularFillup  = get("vocal_circular_fillup",  bool, True)
-
-        self.vocalLaneSize = get("vocal_lane_size", float, .002)
-        self.vocalGlowSize = get("vocal_glow_size", float, .012)
-        self.vocalGlowFade = get("vocal_glow_fade", float,   .6)
-
-        self.vocalLaneColor       = get("vocal_lane_color",        "color", "#99FF80")
-        self.vocalShadowColor     = get("vocal_shadow_color",      "color", "#CCFFBF")
-        self.vocalGlowColor       = get("vocal_glow_color",        "color", "#33FF00")
-        self.vocalLaneColorStar   = get("vocal_lane_color_star",   "color", "#FFFF80")
-        self.vocalShadowColorStar = get("vocal_shadow_color_star", "color", "#FFFFBF")
-        self.vocalGlowColorStar   = get("vocal_glow_color_star",   "color", "#FFFF00")
-
-        #3D Note/Fret rendering system
-        self.twoDnote = get("twoDnote", bool, True)
-        self.twoDkeys = get("twoDkeys", bool, True)
-
-        #3D notes spin when they are star power notes
-        self.threeDspin  = get("threeDspin", bool, False)
-
-        #configure rotation and positioning along the neck for the 3d objects scrolling down
-        self.noterot     = [get("noterot"+str(i+1),     float, 0) for i in range(5)]
-        self.keyrot      = [get("keyrot"+str(i+1),      float, 0) for i in range(5)]
-        self.drumnoterot = [get("drumnoterot"+str(i+1), float, 0) for i in range(5)]
-        self.drumkeyrot  = [get("drumkeyrot"+str(i+1),  float, 0) for i in range(5)]
-        self.notepos     = [get("notepos"+str(i+1),     float, 0) for i in range(5)]
-        self.keypos      = [get("keypos"+str(i+1),      float, 0) for i in range(5)]
-        self.drumnotepos = [get("drumnotepos"+str(i+1), float, 0) for i in range(5)]
-        self.drumkeypos  = [get("drumkeypos"+str(i+1),  float, 0) for i in range(5)]
-
-        #3D setting for making the notes always face the camera
-        self.billboardNote = get("billboardNote", bool, True)
-
-        #In-game rendering
-        self.hopoIndicatorX = get("hopo_indicator_x")
-        self.hopoIndicatorY = get("hopo_indicator_y")
-        self.hopoIndicatorActiveColor = get("hopo_indicator_active_color", "color", "#FFFFFF")
-        self.hopoIndicatorInactiveColor = get("hopo_indicator_inactive_color", "color", "#666666")
-        self.markSolos = get("mark_solo_sections", int, 2)
-        self.ingame_stats_colorVar = get("ingame_stats_color", "color", "#FFFFFF")
-        self.fpsRenderPos = (get("fps_display_pos_x", float, .85), get("fps_display_pos_y", float, .055))
-
-        #Game results scene
-        self.result_score = get("result_score", str, ".5,.11,0.0025,None,None").split(",")
-        self.result_star = get("result_star", str, ".5,.4,0.15,1.1").split(",")
-        self.result_song = get("result_song", str, ".05,.045,.002,None,None").split(",")
-        self.result_song_form = get("result_song_form", int, 0)
-        self.result_song_text = get("result_song_text", str, "%s Finished!").strip()
-        self.result_stats_part = get("result_stats_part", str, ".5,.64,0.002,None,None").split(",")
-        self.result_stats_part_text = get("result_stats_part_text", str, "Part: %s").strip()
-        self.result_stats_name = get("result_stats_name", str, ".5,.73,0.002,None,None").split(",")
-        self.result_stats_diff = get("result_stats_diff", str, ".5,.55,0.002,None,None").split(",")
-        self.result_stats_diff_text = get("result_stats_diff_text", str, "Difficulty: %s").strip()
-        self.result_stats_accuracy = get("result_stats_accuracy", str, ".5,.61,0.002,None,None").split(",")
-        self.result_stats_accuracy_text = get("result_stats_accuracy_text", str, "Accuracy: %.1f%%").strip()
-        self.result_stats_streak = get("result_stats_streak", str, ".5,.58,0.002,None,None").split(",")
-        self.result_stats_streak_text = get("result_stats_streak_text", str, "Long Streak: %s").strip()
-        self.result_stats_notes = get("result_stats_notes", str, ".5,.52,0.002,None,None").split(",")
-        self.result_stats_notes_text = get("result_stats_notes_text", str, "%s Notes Hit").strip()
-        self.result_cheats_info = get("result_cheats_info", str, ".5,.3,.002").split(",")
-        self.result_cheats_numbers = get("result_cheats_numbers", str, ".5,.35,.0015").split(",")
-        self.result_cheats_percent = get("result_cheats_percent", str, ".45,.4,.0015").split(",")
-        self.result_cheats_score   = get("result_cheats_score", str, ".75,.4,.0015").split(",")
-        self.result_cheats_color   = get("result_cheats_color", "color", "#FFFFFF")
-        self.result_cheats_font    = get("result_cheats_font", str, "font")
-        self.result_high_score_font = get("result_high_score_font", str, "font")
-        self.result_menu_x         = get("result_menu_x", float, .5)
-        self.result_menu_y         = get("result_menu_y", float, .2)
-        self.result_star_type      = get("result_star_type", int, 0)
-
         #Submenus
         self.submenuScale = {}
         self.submenuX = {}
@@ -739,28 +477,6 @@ class Theme(Task):
         else:
             retval = tuple(type(n.strip()) for n in vals)
         return retval
-
-    def loadThemeModule(self, moduleName):
-        try:
-            fp, pathname, description = imp.find_module(moduleName,[self.path])
-            module = imp.load_module(moduleName, fp, pathname, description)
-            if moduleName in ["CustomLobby", "ThemeLobby"]:
-                return module.CustomLobby(self)
-            elif moduleName in ["CustomSetlist", "Setlist"]:
-                return module.CustomSetlist(self)
-            elif moduleName in ["CustomParts", "ThemeParts"]:
-                return module.CustomParts(self)
-            else:
-                return None
-        except ImportError:
-            if moduleName in ["CustomLobby", "ThemeLobby"]:
-                return ThemeLobby(self)
-            elif moduleName in ["CustomSetlist", "Setlist"]:
-                return Setlist(self)
-            elif moduleName in ["CustomParts", "ThemeParts"]:
-                return ThemeParts(self)
-            else:
-                return None
 
     def run(self, ticks):
         pass

@@ -94,9 +94,10 @@ class Guitar(Instrument):
 
         self.rockLevel = 0.0
 
-    def render(self, visibility, song, pos, controls, killswitch):
+    def render(self, visibility, song, pos, controls):
+        self.neck.render(visibility, song, pos)
         notes = self.getRequiredNotesForRender(song, pos)
-        self.renderTails(notes, visibility, song, pos, killswitch)
+        self.renderTails(notes, visibility, song, pos)
         self.renderFrets(visibility, song, controls)
         self.renderNotes(notes, visibility, song, pos)
         self.renderHitGlow()

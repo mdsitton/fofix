@@ -106,8 +106,6 @@ class Instrument(object):
 
         #blazingamer
         self.nstype = self.engine.config.get("game", "nstype")                  # neck style
-        self.noterotate = self.engine.config.get("coffee", "noterotate")        # adjust notes for if they were designed for FoF 1.1 or 1.2
-        self.billboardNote = self.engine.theme.billboardNote                    # 3D notes follow the angle of the camera
 
         self.speed = self.engine.config.get("coffee", "neckSpeed") * 0.01
 
@@ -364,14 +362,6 @@ class Instrument(object):
                     (time >= (pos - self.lateMargin)) and (time <= (pos + self.earlyMargin)) ]
 
         return sorted(notes, key=lambda x: x[0])
-
-    def areNotesTappable(self, notes):
-        if not notes:
-            return
-        for time, note in notes:
-            if note.tappable > 1:
-                return True
-        return False
 
     def getMissedNotes(self, song, pos, catchup = False):
         if not song and not song.readyToGo:
@@ -858,7 +848,7 @@ class Instrument(object):
         if tailOnly:
             return
 
-    def renderTails(self, notes, visibility, song, pos, killswitch):
+    def renderTails(self, notes, visibility, song, pos):
         if not song:
             return
         if not song.readyToGo:

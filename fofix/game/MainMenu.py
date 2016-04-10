@@ -65,23 +65,9 @@ class MainMenu(BackgroundLayer):
         self.theme       = self.engine.data.theme
         self.themeCoOp   = self.engine.data.themeCoOp
         self.themename   = self.engine.data.themeLabel
-        self.useSoloMenu = self.engine.theme.use_solo_submenu
 
         self.menux = self.engine.theme.menuPos[0]
         self.menuy = self.engine.theme.menuPos[1]
-
-        self.rbmenu = self.engine.theme.menuRB
-
-        #MFH
-        self.main_menu_scale = self.engine.theme.main_menu_scaleVar
-        self.main_menu_vspacing = self.engine.theme.main_menu_vspacingVar
-
-        self.opt_text_color     = self.engine.theme.opt_text_colorVar
-        self.opt_selected_color = self.engine.theme.opt_selected_colorVar
-
-        self.opt_bkg_size = [float(i) for i in self.engine.theme.opt_bkg_size]
-        self.opt_text_color = self.engine.theme.opt_text_colorVar
-        self.opt_selected_color = self.engine.theme.opt_selected_colorVar
 
         strQuickplay = "Quickplay"
         strSettings = "Settings"

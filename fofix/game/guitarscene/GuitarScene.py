@@ -84,7 +84,6 @@ class GuitarScene(Scene):
         self.keysList = []
         self.numberOfGuitars = len(self.playerList)
         self.numOfPlayers    = len(self.playerList)
-        self.neckrender = []
 
         gNum = 0
         for j,player in enumerate(self.playerList):
@@ -103,7 +102,6 @@ class GuitarScene(Scene):
             if guitar:
                 player.guitarNum = gNum
                 gNum += 1
-                self.neckrender.append(self.instruments[j].neck)
                 if self.instruments[j].isDrum:
                     self.keysList.append(player.drums)
                     self.instruments[j].keys    = player.drums
@@ -113,7 +111,6 @@ class GuitarScene(Scene):
                     self.instruments[j].keys    = player.keys
                     self.instruments[j].actions = player.actions
             else:
-                self.neckrender.append(None)
                 self.keysList.append([])
 
         #for number formatting with commas for Rock Band:
@@ -123,15 +120,12 @@ class GuitarScene(Scene):
         self.libraryName      = libraryName
         self.songName         = songName
         self.done             = False
-
-        self.lastMultTime     = [None for i in self.playerList]
         self.song             = None
 
         self.numOfPlayers = len(self.playerList)
 
         self.timeLeft = None
 
-        self.lastPickPos      = [None for i in self.playerList]
         self.keyBurstTimeout  = [None for i in self.playerList]
         self.keyBurstPeriod   = 30
 
@@ -144,12 +138,6 @@ class GuitarScene(Scene):
 
         #Get theme
         self.themeName = self.engine.data.themeLabel
-
-        self.lessHit = False
-        self.minBase = 400
-        self.pluBase = 15
-        self.minGain = 2
-        self.pluGain = 7
 
         #Dialogs.changeLoadingSplashScreenText(self.engine, splash, _("Loading Settings..."))
         self.loadSettings()
@@ -193,8 +181,6 @@ class GuitarScene(Scene):
 
         self.countdownPosX = self.engine.theme.countdownPosX
         self.countdownPosY = self.engine.theme.countdownPosY
-
-        self.fpsRenderPos = self.engine.theme.fpsRenderPos
 
         self.boardZ = 1
 
@@ -240,26 +226,15 @@ class GuitarScene(Scene):
 
         self.counterY = -0.1
 
-        #MFH - retrieve theme.ini pause background & text positions
-        self.pause_bkg = [float(i) for i in self.engine.theme.pause_bkg_pos]
-        self.pause_text_x = self.engine.theme.pause_text_xPos
-        self.pause_text_y = self.engine.theme.pause_text_yPos
-
-        if self.pause_text_x == None:
-            self.pause_text_x = .3
-
-        if self.pause_text_y == None:
-            self.pause_text_y = .31
+        self.pause_text_x = .3
+        self.pause_text_y = .31
 
         #MFH - new theme.ini color options:
-        self.ingame_stats_color = self.engine.theme.ingame_stats_colorVar
-        self.pause_text_color = self.engine.theme.pause_text_colorVar
-        self.pause_selected_color = self.engine.theme.pause_selected_colorVar
+        self.pause_text_color = (1.0, 1.0, 1.0)
+        self.pause_selected_color = (1.0, 0.749, 0.0)
 
         settingsMenu = Settings.GameSettingsMenu(self.engine, self.pause_text_color, self.pause_selected_color, players = self.playerList)
         settingsMenu.fadeScreen = False
-
-        Log.debug("Pause text / selected colors: " + str(self.pause_text_color) + " / " + str(self.pause_selected_color))
 
         self.menu = Menu(self.engine, [
           (_("   RESUME"),       self.resumeSong),
@@ -438,15 +413,7 @@ class GuitarScene(Scene):
             return
 
         if self.instruments[num].playedNotes:
-            # If all the played notes are tappable, there are no required notes and
-            # the last note was played recently enough, ignore this pick
-            if self.instruments[num].areNotesTappable(self.instruments[num].playedNotes) and \
-               not self.instruments[num].getRequiredNotes(self.song, self.songTime) and \
-               self.songTime - self.lastPickPos[num] <= self.song.period / 2:
-                return
             self.endPick(num)
-
-        self.lastPickPos[num] = self.songTime
 
         if self.instruments[num].startPick(self.song, self.songTime, self.controls):
             # note hit
@@ -691,8 +658,7 @@ class GuitarScene(Scene):
         for i, guitar in enumerate(self.instruments):
             if not self.pause:
                 glPushMatrix()
-                self.neckrender[i].render(self.visibility, self.song, self.songTime)
-                guitar.render(self.visibility, self.song, self.songTime, self.controls, False)#last is killswitch  #QQstarS: new
+                guitar.render(self.visibility, self.song, self.songTime, self.controls)
                 glPopMatrix()
 
             self.engine.view.setViewport(1,0)
@@ -738,20 +704,16 @@ class GuitarScene(Scene):
 
                     self.engine.theme.setBaseColor()
 
-                    if self.song and self.pause:
-                        self.engine.view.setViewport(1,0)
-                        if self.engine.graphicMenuShown == False:
-                            drawImage(self.pauseScreen, scale = (self.pause_bkg[2], -self.pause_bkg[3]), coord = (w*self.pause_bkg[0],h*self.pause_bkg[1]), stretched = FULL_SCREEN)
-
+                    # if self.song and self.pause:
                 self.engine.view.setViewport(1,0)
 
                 # evilynux - Display framerate
                 if self.engine.show_fps: #probably only need to once through.
-                    c1,c2,c3 = self.ingame_stats_color
-                    glColor3f(c1, c2, c3)
+                    glColor3f(1.0, 1.0, 1.0)
                     text = _("FPS: %.2f" % self.engine.fpsEstimate)
                     w, h = font.getStringSize(text, scale = 0.00140)
-                    font.render(text, (self.fpsRenderPos[0], self.fpsRenderPos[1] - h/2), (1,0,0), 0.00140)
+                    x = 0.85; y = 0.055
+                    font.render(text, (x, y] - h/2), (1,0,0), 0.00140)
 
                 #MFH - Get Ready to Rock & countdown
                 if not self.pause:

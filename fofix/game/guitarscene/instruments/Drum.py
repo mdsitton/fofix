@@ -142,7 +142,8 @@ class Drum(Instrument):
 
         engine.loadImgDrawing(self, "fretButtons", os.path.join("themes",themename, "frets", "drum", "fretbuttons.png"))
 
-    def render(self, visibility, song, pos, controls, killswitch):
+    def render(self, visibility, song, pos, controls):
+        self.neck.render(visibility, song, pos)
         notes = self.getRequiredNotesForRender(song, pos)
         self.renderFrets(visibility, song, controls)
         self.renderOpenNotes(notes, visibility, song, pos)

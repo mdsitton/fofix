@@ -178,7 +178,6 @@ class SettingsMenu(Menu.Menu):
             ConfigChoice(engine, engine.config, "game", "bass_kick_sound", autoApply = True),   #myfingershurt
             ConfigChoice(engine, engine.config, "game", "star_claps", autoApply = True),      #myfingershurt
             ConfigChoice(engine, engine.config, "game", "beat_claps", autoApply = True), #racer
-            ConfigChoice(engine, engine.config, "audio",  "whammy_effect", autoApply = True),     #MFH
             ConfigChoice(engine, engine.config, "audio", "enable_crowd_tracks", autoApply = True),
             ConfigChoice(engine, engine.config, "audio",  "frequency"),
             ConfigChoice(engine, engine.config, "audio",  "bits"),
