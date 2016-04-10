@@ -79,8 +79,6 @@ class Guitar(Instrument):
         self.killfx = self.engine.config.get("performance", "killfx")
         self.killCount         = 0
 
-        self.bigMax = 1
-
         #Get theme
         #now theme determination logic is only in data.py:
         self.theme = self.engine.data.theme

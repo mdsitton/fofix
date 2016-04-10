@@ -54,7 +54,6 @@ class Instrument(object):
         self.beatsPerUnit             = self.beatsPerBoard / self.boardLength
 
         self.fretColors = self.engine.theme.noteColors
-        self.useFretColors = self.engine.theme.use_fret_colors
         self.flameColors = self.fretColors
         self.hitGlowColors = self.fretColors
         self.glowColor = self.fretColors
@@ -79,8 +78,6 @@ class Instrument(object):
 
         #myfingershurt: to keep track of pause status here as well
         self.paused = False
-
-        self.killPoints = False
 
         # get difficulty
         self.difficulty = playerObj.getDifficultyInt()
@@ -582,10 +579,6 @@ class Instrument(object):
         if not song and not song.readyToGo:
             return
 
-        self.bigMax = 0
-
-        self.killPoints = False
-
         w = self.boardWidth / self.strings
 
         renderedNotes = reversed(notes)
@@ -599,38 +592,14 @@ class Instrument(object):
 
             if self.isDrum:
                 x  = (self.strings / 2 - .5 - (event.number - 1)) * w
-                isOpen = False
-                c = self.fretColors[event.number]
             else:
                 x  = (self.strings / 2 - (event.number)) * w
-                isOpen = False
-                c = self.fretColors[event.number]
-
-            if event.number == 4 and self.isDrum:
-                c = self.fretColors[0]        #myfingershurt: need to swap note 0 and note 4 colors for drums:
 
             z  = ((time - pos) / self.currentPeriod) / self.beatsPerUnit
-            z2 = ((time + event.length - pos) / self.currentPeriod) / self.beatsPerUnit
 
-            if z > self.boardLength * .8:
-                f = (self.boardLength - z) / (self.boardLength * .2)
-            elif z < 0:
-                f = min(1, max(0, 1 + z2))
-            else:
-                f = 1.0
+            color      = (1, 1, 1, 1)
 
-            if not self.useFretColors:
-                color      = (1, 1, 1, 1 * visibility * f)
-            else:
-                color      = (.1 + .8 * c[0], .1 + .8 * c[1], .1 + .8 * c[2], 1 * visibility * f)
-
-            if self.isDrum:
-                length     = 0
-            else:
-                if event.length > 120:
-                    length     = (event.length - 50) / self.currentPeriod / self.beatsPerUnit
-                else:
-                    length     = 0
+            length     = 0
 
             tailOnly   = False
 
@@ -643,15 +612,11 @@ class Instrument(object):
             if (event.played or event.hopod): #if the note is hit
                 continue
 
-
             if self.isDrum:
                 sustain = False
-
-                glPushMatrix()
-                glTranslatef(x, 0, z)
-                self.renderNote(length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, fret = event.number, isOpen = isOpen)
-                glPopMatrix()
             else:
+                if event.length > 120:
+                    length = (event.length - 50) / self.currentPeriod / self.beatsPerUnit
                 if z + length < -1.0:
                     continue
                 if event.length <= 120:
@@ -661,21 +626,17 @@ class Instrument(object):
                 if event.length > (1.4 * (60000.0 / self.currentBpm) / 4):
                     sustain = True
 
-                glPushMatrix()
-                glTranslatef(x, 0, z)
+            glPushMatrix()
+            glTranslatef(x, 0, z)
 
-                self.renderNote(length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, fret = event.number, )
-                glPopMatrix()
+            self.renderNote(length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, fret = event.number, isOpen = False)
+            glPopMatrix()
 
     def renderOpenNotes(self, notes, visibility, song, pos):
         if not song:
             return
         if not song.readyToGo:
             return
-
-        self.bigMax = 0
-
-        self.killPoints = False
 
         renderedNotes = reversed(notes)
         for time, event in renderedNotes:
@@ -688,35 +649,18 @@ class Instrument(object):
 
             isOpen     = True
             x  = 0
-            c = self.openFretColor
             z  = ((time - pos) / self.currentPeriod) / self.beatsPerUnit
 
-            if z > self.boardLength * .8:
-                f = (self.boardLength - z) / (self.boardLength * .2)
-            else:
-                f = 1.0
+            color = (1,1,1,1)
 
-            if not self.useFretColors:
-                color      = (1,1,1, 1 * visibility * f)
-            else:
-                color      = (.1 + .8 * c[0], .1 + .8 * c[1], .1 + .8 * c[2], 1 * visibility * f)
-
-            length     = 0
-
-            tailOnly   = False
-
-            isTappable = False
-
+            length = 0
 
             if (event.played or event.hopod): #if the note is hit
                 continue
 
-
-            sustain = False
-
             glPushMatrix()
             glTranslatef(x, 0, z)
-            self.renderNote(length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, fret = event.number, isOpen = isOpen)
+            self.renderNote(length, sustain = False, color = color, tailOnly = False, isTappable = False, fret = event.number, isOpen = isOpen)
             glPopMatrix()
 
     def renderFrets(self, visibility, song, controls):
@@ -828,7 +772,7 @@ class Instrument(object):
                                     texcoord = (0.0, 0.0, 1.0, 1.0), vertex = (-size * f, -size * f, size * f, size * f),
                                     multiples = True, alpha = True, color = c[:3])
 
-    def renderTail(self, song, length, sustain, color, tailOnly = False, isTappable = False, big = False, fret = 0, pos = 0):
+    def renderTail(self, song, length, sustain, color, tailOnly = False, big = False, fret = 0, pos = 0):
 
         def project(beat):
             return 0.125 * beat / self.beatsPerUnit    # glorandwarf: was 0.12
@@ -919,11 +863,8 @@ class Instrument(object):
         if not song.readyToGo:
             return
 
-        self.killPoints = False
-
         w = self.boardWidth / self.strings
 
-        num = 0
         renderedNotes = notes
 
         for time, event in renderedNotes:
@@ -938,49 +879,33 @@ class Instrument(object):
 
             x  = (self.strings / 2 - event.number) * w
             z  = ((time - pos) / self.currentPeriod) / self.beatsPerUnit
-            z2 = ((time + event.length - pos) / self.currentPeriod) / self.beatsPerUnit
 
-
-            if z > self.boardLength * .8:
-                f = (self.boardLength - z) / (self.boardLength * .2)
-            elif z < 0:
-                f = min(1, max(0, 1 + z2))
-            else:
-                f = 1.0
-
-            color      = (.1 + .8 * c[0], .1 + .8 * c[1], .1 + .8 * c[2], 1 * visibility * f)
+            color      = (.1 + .8 * c[0], .1 + .8 * c[1], .1 + .8 * c[2], 1.0)
             if event.length > 120:
                 length     = (event.length - 50) / self.currentPeriod / self.beatsPerUnit
             else:
                 length     = 0
             tailOnly   = False
 
-            if event.tappable < 2:
-                isTappable = False
-            else:
-                isTappable = True
-
             # Clip the played notes to the origin
-            if event.played or event.hopod:#if the note isnt missed
+            if event.played or event.hopod: # if the note is played
                 tailOnly = True
                 length += z
                 z = 0
                 if length <= 0:
                     continue
-            if z < 0 and not (event.played or event.hopod):#if the note is missed
-                color = (.6, .6, .6, .5 * visibility * f)
+            elif z < 0: #if the note is missed
+                color = (.6, .6, .6, 1.0)
 
             big = False
-            self.bigMax = 0
             for i in range(0, self.strings):
                 if self.hit[i]:
                     big = True
-                    self.bigMax += 1
 
             if z + length < -1.0:
                 continue
 
-            #crop to board edge
+            # crop to board edge
             if z+length > self.boardLength:
                 length     = self.boardLength-z
 
@@ -991,10 +916,9 @@ class Instrument(object):
             glPushMatrix()
             glTranslatef(x, (1.0 - visibility) ** (event.number + 1), z)
 
-            if big == True and num < self.bigMax:
-                num += 1
-                self.renderTail(song, length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, big = True, fret = event.number, pos = pos)
+            if big == True:
+                self.renderTail(song, length, sustain = sustain, color = color, tailOnly = tailOnly, big = True, fret = event.number, pos = pos)
             else:
-                self.renderTail(song, length, sustain = sustain, color = color, tailOnly = tailOnly, isTappable = isTappable, fret = event.number, pos = pos)
+                self.renderTail(song, length, sustain = sustain, color = color, tailOnly = tailOnly, fret = event.number, pos = pos)
 
             glPopMatrix()

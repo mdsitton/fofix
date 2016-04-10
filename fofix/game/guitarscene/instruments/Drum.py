@@ -98,8 +98,6 @@ class Drum(Instrument):
         self.opencolor = self.fretColors[5]
         self.rockLevel = 0.0
 
-        self.bigMax = 1
-
         if self.engine.config.get("game", "large_drum_neck"):
             self.boardWidth     *= (4.0/3.0)
             self.boardLength    *= (4.0/3.0)
