@@ -433,6 +433,7 @@ class GuitarScene(Scene):
         self.song.stop()
 
     def doPick(self, num):
+        # This is only called from drums
         if not self.song:
             return
 
@@ -448,11 +449,14 @@ class GuitarScene(Scene):
         self.lastPickPos[num] = self.songTime
 
         if self.instruments[num].startPick(self.song, self.songTime, self.controls):
+            # note hit
             self.song.setInstrumentVolume(1.0, self.playerList[num].part)
         else:
+            # note missed
             self.song.setInstrumentVolume(0.0, self.playerList[num].part)
 
     def handlePick(self, playerNum, hopo = False, pullOff = False):
+        # This is only called from guitar
         num = playerNum
         guitar = self.instruments[num]
 
@@ -499,8 +503,8 @@ class GuitarScene(Scene):
             self.instruments[num].hopoProblemNoteNum = -1
 
         if self.instruments[num].startPick3(self.song, pos, self.controls, hopo):
+            # note hit
             self.song.setInstrumentVolume(1.0, self.playerList[num].part)
-
         else:
             ApplyPenalty = True
 
@@ -535,6 +539,7 @@ class GuitarScene(Scene):
                 self.instruments[num].sameNoteHopoString = False
                 self.instruments[num].hopoProblemNoteNum = -1
                 self.instruments[num].hopoLast = -1
+                # note missed
                 self.song.setInstrumentVolume(0.0, self.playerList[num].part)
 
     def keyPressed(self, key, unicode, control=None, pullOff = False):
@@ -557,19 +562,14 @@ class GuitarScene(Scene):
             pressed = True
             if control in Player.bassdrums:
                 self.instruments[num].drumsHeldDown[0] = 100
-                self.instruments[num].playedSound[0] = False
             elif control in Player.drum1s:
                 self.instruments[num].drumsHeldDown[1] = 100
-                self.instruments[num].playedSound[1] = False
             elif control in Player.drum2s:
                 self.instruments[num].drumsHeldDown[2] = 100
-                self.instruments[num].playedSound[2] = False
             elif control in Player.drum3s:
                 self.instruments[num].drumsHeldDown[3] = 100
-                self.instruments[num].playedSound[3] = False
             elif control in Player.drum5s:
                 self.instruments[num].drumsHeldDown[4] = 100
-                self.instruments[num].playedSound[4] = False
             else:
                 pressed = False
         else:

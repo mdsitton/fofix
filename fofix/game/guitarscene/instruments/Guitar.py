@@ -199,8 +199,6 @@ class Guitar(Instrument):
             if note.played != True:
                 continue
 
-            self.pickStartPos = pos
-            self.pickStartPos = max(self.pickStartPos, time)
             if hopo:
                 note.hopod        = True
             else:

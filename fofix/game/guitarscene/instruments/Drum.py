@@ -77,7 +77,6 @@ class Drum(Instrument):
 
         self.strings        = 4
         self.strings2       = 5
-        self.playedSound  = [True, True, True, True, True]
 
         self.openFretActivity = 0.0
         self.openFretColor  = self.fretColors[5]
@@ -150,6 +149,11 @@ class Drum(Instrument):
         self.renderNotes(notes, visibility, song, pos)
         self.renderFlames(notes, song, pos)
 
+    def hitNote(self, time, note):
+        self.playedNotes.append([time, note])
+        note.played = True
+        return True
+
     def startPick(self, song, pos, controls, hopo = False):
         if not song:
             return False
@@ -158,12 +162,10 @@ class Drum(Instrument):
 
         self.matchingNotes = self.getRequiredNotes(song, pos)    #MFH - ignore skipped notes please!
 
-
         # no self.matchingNotes?
         if not self.matchingNotes:
             return False
         self.playedNotes = []
-        self.pickStartPos = pos
 
         #adding bass drum hit every bass fret:
         for time, note in self.matchingNotes:
@@ -219,17 +221,3 @@ class Drum(Instrument):
         for time, note in self.playedNotes:
             if pos > time + note.length:
                 self.endPick(pos)
-
-        missedNotes = self.getMissedNotes(song, pos, catchup = True)
-        if self.paused:
-            missedNotes = []
-
-        if not self.processedFirstNoteYet and not self.playedNotes and len(missedNotes) > 0:
-
-            self.processedFirstNoteYet = True
-            self.hopoLast = -1
-
-            self.hopoActive = 0
-            self.wasLastNoteHopod = False
-            self.sameNoteHopoString = False
-            self.hopoProblemNoteNum = -1

@@ -41,7 +41,6 @@ class Instrument(object):
 
         self.selectedString = 0
         self.time           = 0.0
-        self.pickStartPos   = 0
         self.leftyMode      = False
         self.drumFlip       = False
 
@@ -309,12 +308,6 @@ class Instrument(object):
         self.loadNotes()
         self.loadTails()
         self.loadFlames()
-
-    def hitNote(self, time, note):
-        self.pickStartPos = max(self.pickStartPos, time)
-        self.playedNotes.append([time, note])
-        note.played = True
-        return True
 
     def endPick(self, pos):
         if not self.isDrum:
