@@ -359,7 +359,7 @@ class Instrument(object):
         self.neck.baseBeat      = self.baseBeat
 
     #MFH - corrected and optimized:
-    def getRequiredNotesMFH(self, song, pos, hopoTroubleCheck = False):
+    def getRequiredNotes(self, song, pos, hopoTroubleCheck = False):
 
         track   = song.track[self.player]
 
@@ -379,7 +379,7 @@ class Instrument(object):
                 return True
         return False
 
-    def getMissedNotesMFH(self, song, pos, catchup = False):
+    def getMissedNotes(self, song, pos, catchup = False):
         if not song and not song.readyToGo:
             return
 
@@ -577,7 +577,7 @@ class Instrument(object):
         noteImage = self.noteButtons
         vtx = self.noteVtx
         texCoord = self.noteTexCoord[y][fret]
-        
+
         draw3Dtex(noteImage, vertex = vtx, texcoord = texCoord,
                               scale = (1,1,1), rot = (self.camAngle,1,0,0), multiples = False, color = color)
 

@@ -452,7 +452,7 @@ class GuitarScene(Scene):
             # If all the played notes are tappable, there are no required notes and
             # the last note was played recently enough, ignore this pick
             if self.instruments[num].areNotesTappable(self.instruments[num].playedNotes) and \
-               not self.instruments[num].getRequiredNotesMFH(self.song, self.songTime) and \
+               not self.instruments[num].getRequiredNotes(self.song, self.songTime) and \
                self.songTime - self.lastPickPos[num] <= self.song.period / 2:
                 return
             self.endPick(num)
@@ -688,7 +688,7 @@ class GuitarScene(Scene):
                     # done playing the current notes
                     self.endPick(i)
 
-                missedNotes = instrument.getMissedNotesMFH(self.song, self.songTime, catchup = True)
+                missedNotes = instrument.getMissedNotes(self.song, self.songTime, catchup = True)
                 if instrument.paused:
                     missedNotes = []
 

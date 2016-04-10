@@ -291,7 +291,7 @@ class Guitar(Instrument):
 
         self.playedNotes = []
 
-        self.matchingNotes = self.getRequiredNotesMFH(song, pos)
+        self.matchingNotes = self.getRequiredNotes(song, pos)
 
         if self.controlsMatchNotes(controls, self.matchingNotes):
             self.pickStartPos = pos
@@ -313,7 +313,7 @@ class Guitar(Instrument):
         self.lastPlayedNotes = self.playedNotes
         self.playedNotes = []
 
-        self.matchingNotes = self.getRequiredNotesMFH(song, pos)
+        self.matchingNotes = self.getRequiredNotes(song, pos)
 
         self.controlsMatchNotes3(controls, self.matchingNotes, hopo)
 
