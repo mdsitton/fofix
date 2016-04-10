@@ -70,9 +70,6 @@ class Guitar(Instrument):
 
         #myfingershurt:
         self.hopoStyle        = self.engine.config.get("game", "hopo_system")
-        self.gh2sloppy        = self.engine.config.get("game", "gh2_sloppy")
-        if self.gh2sloppy == 1:
-            self.hopoStyle = 4
         self.sfxVolume    = self.engine.config.get("audio", "SFX_volume")
 
         #blazingamer
@@ -269,14 +266,13 @@ class Guitar(Instrument):
                 return False
 
 
-            #myfingershurt: this is where to filter out higher frets held when HOPOing:
-            if hopo == False or self.hopoStyle == 2 or self.hopoStyle == 3:
-            #Check for higher numbered frets if not a HOPO or if GH2 strict mode
-                for n, k in enumerate(self.keys):
-                    if (n > requiredKey and n < 5) or (n > 4 and n > requiredKey + 5):
-                    #higher numbered frets cannot be held
-                        if controls.getState(k):
-                            return False
+            # myfingershurt: this is where to filter out higher frets held when HOPOing:
+            # Check for higher numbered frets
+            for n, k in enumerate(self.keys):
+                if (n > requiredKey and n < 5) or (n > 4 and n > requiredKey + 5):
+                #higher numbered frets cannot be held
+                    if controls.getState(k):
+                        return False
 
         return True
 

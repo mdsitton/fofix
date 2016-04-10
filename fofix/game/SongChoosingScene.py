@@ -66,8 +66,6 @@ class SongChoosingScene(Scene):
 
         self.engine.world.sceneName = "SongChoosingScene"
 
-        Song.updateSongDatabase(self.engine)
-
         self.wizardStarted = False
         self.libraryName   = libraryName
         self.songName      = songName
@@ -594,7 +592,7 @@ class SongChoosingScene(Scene):
         scale = font.scaleText(text, maxwidth = 0.45)
         font.render(text, (self.song_listcd_list_xpos, .09*(n+1)), scale = scale)
 
-        if isinstance(item, Song.SongInfo) and not item.getLocked():
+        if isinstance(item, Song.SongInfo):
             if not item.frets == "":
                 suffix = ", ("+item.frets+")"
             else:

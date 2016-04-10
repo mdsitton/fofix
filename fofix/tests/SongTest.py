@@ -60,7 +60,6 @@ class SongTest(unittest.TestCase):
 
             events1 = song.track[0].getAllEvents()
 
-            song.save()
             song       = Song(e, infoFile, guitarFile, songFile, None, noteFile)
 
             events2 = song.track[0].getAllEvents()

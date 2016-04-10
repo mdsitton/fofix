@@ -218,10 +218,8 @@ class GuitarScene(Scene):
 
         #akedrou - moved this to the part where it loads notes...
         for i in range(self.numOfPlayers):
-            #MFH - should only be done the first time.
-            if self.hopoStyle > 0 or self.song.info.hopo == "on":
-                if not self.instruments[i].isDrum:
-                    self.song.track[i].markHopoGH2(self.song.info.eighthNoteHopo, self.song.info.hopofreq)
+            if not self.instruments[i].isDrum:
+                self.song.track[i].markHopoGH2(self.song.info.eighthNoteHopo, self.song.info.hopofreq)
 
         lastTime = 0
         for i in range(self.numOfPlayers):
@@ -343,11 +341,6 @@ class GuitarScene(Scene):
         self.song = None
 
     def loadSettings(self):
-
-        self.hopoStyle        = self.engine.config.get("game", "hopo_system")
-        self.gh2sloppy        = self.engine.config.get("game", "gh2_sloppy")
-        if self.gh2sloppy == 1:
-            self.hopoStyle = 4
 
         self.pov              = self.engine.config.get("fretboard", "point_of_view")
         #CoffeeMod
@@ -523,7 +516,7 @@ class GuitarScene(Scene):
             if pullOff:   #always ignore bad pull-offs
                 ApplyPenalty = False
 
-            if (self.hopoStyle == 3 and hopo == True):  #GH2
+            if hopo == True:
                 ApplyPenalty = False
                 if not (self.instruments[num].LastStrumWasChord or (self.instruments[num].wasLastNoteHopod and LastHopoFretStillHeld)):
                     self.instruments[num].hopoActive = 0

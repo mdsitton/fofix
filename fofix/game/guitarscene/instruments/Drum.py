@@ -91,9 +91,6 @@ class Drum(Instrument):
 
         self.fretActivity   = [0.0] * self.strings
 
-        #myfingershurt:
-        self.hopoStyle = 0
-
         #blazingamer
         self.opencolor = self.fretColors[5]
         self.rockLevel = 0.0
