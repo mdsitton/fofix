@@ -251,15 +251,21 @@ class GuitarScene(Scene):
         textColor = self.pause_text_color,
         selectedColor = self.pause_selected_color)
 
-        self.restartSong(firstTime = True)
+        self.restartSong()
 
         # hide the splash screen
         Dialogs.hideLoadingSplashScreen(self.engine, splash)
-        splash = None
 
         self.engine.collectGarbage()
 
         #MFH - end of GuitarScene client initialization routine
+
+    def endGame(self):
+        if self.song:
+            self.song.stop()
+            self.done  = True
+
+            self.changeSong()
 
     def pauseGame(self):
         if self.song and self.song.readyToGo:
@@ -392,7 +398,7 @@ class GuitarScene(Scene):
             self.song.readyToGo = True
 
 
-    def restartSong(self, firstTime = False):  #QQstarS: Fix this function
+    def restartSong(self):  #QQstarS: Fix this function
         self.resetVariablesToDefaults()
         self.engine.data.startSound.play()
         self.engine.view.popLayer(self.menu)
@@ -662,14 +668,6 @@ class GuitarScene(Scene):
                 glPopMatrix()
 
             self.engine.view.setViewport(1,0)
-
-    def goToResults(self):
-        if self.song:
-            self.song.stop()
-            self.done  = True
-            noScore = False
-
-            self.changeSong()
 
     def getPlayerNum(self, control):
         for i, player in enumerate(self.playerList):
