@@ -40,7 +40,6 @@ from fofix.game import Dialogs
 from fofix.core import Audio
 from fofix.core import Settings
 from fofix.core import Version
-from fofix.core import VFS
 from fofix.core import Log
 
 

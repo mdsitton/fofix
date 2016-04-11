@@ -112,7 +112,7 @@ class Guitar(Instrument):
         # check each valid chord
         chords = {}
         for time, note in notes:
-            if note.hopod == True and (controls.getState(self.keys[note.number]) or controls.getState(self.keys[note.number + 5])):
+            if note.hopod == True and (controls.getState(self.keys[note.number])):
                 self.playedNotes = []
                 return True
             if not time in chords:
@@ -160,14 +160,14 @@ class Guitar(Instrument):
 
     def controlsMatchNote(self, controls, chordTuple, requiredKeys, hopo):
         if len(chordTuple) > 1:
-        #Chords must match exactly
+            #Chords must match exactly
             for n in range(self.strings):
-                if (n in requiredKeys and not (controls.getState(self.keys[n]) or controls.getState(self.keys[n+5]))) or (n not in requiredKeys and (controls.getState(self.keys[n]) or controls.getState(self.keys[n+5]))):
+                if (n in requiredKeys and not controls.getState(self.keys[n])) or (n not in requiredKeys and controls.getState(self.keys[n])):
                     return False
         else:
         #Single Note must match that note
             requiredKey = requiredKeys[0]
-            if not controls.getState(self.keys[requiredKey]) and not controls.getState(self.keys[requiredKey+5]):
+            if not controls.getState(self.keys[requiredKey]):
                 return False
 
 

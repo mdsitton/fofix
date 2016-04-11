@@ -45,7 +45,6 @@ from fofix.game.Credits import Credits
 from fofix.core.constants import *
 from fofix.core.Language import _
 from fofix.game.Menu import Menu
-from fofix.core import Microphone
 from fofix.core import Log
 from fofix.core import Player
 from fofix.core import Config
@@ -845,7 +844,7 @@ def showLoadingSplashScreen(engine, text = _("Loading...")):
     engine.view.pushLayer(splash)
     engine.run()
     return splash
-    
+
 def changeLoadingSplashScreenText(engine, splash, text=_("Loading...")):
     splash.text = text
     engine.run()

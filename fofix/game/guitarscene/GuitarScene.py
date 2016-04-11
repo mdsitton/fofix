@@ -39,7 +39,6 @@ import os
 from OpenGL.GL import *
 
 from fofix.game.Song import Note, loadSong, VocalPhrase
-from fofix.core.Player import STAR, KILL, CANCEL
 from fofix.game.guitarscene.instruments import *
 from fofix.core.Image import drawImage
 from fofix.core.Scene import Scene
@@ -323,7 +322,7 @@ class GuitarScene(Scene):
         self.pov              = self.engine.config.get("fretboard", "point_of_view")
         #CoffeeMod
 
-        self.activeGameControls = self.engine.input.activeGameControls
+        self.activeGameControls = [0]
 
         self.keysList = []
         for i, player in enumerate(self.playerList):
@@ -599,7 +598,7 @@ class GuitarScene(Scene):
         if control in self.keysList[num] and self.song:
             for time, note in self.instruments[num].playedNotes:
                 #myfingershurt: only end the pick if no notes are being held.
-                if (self.instruments[num].hit[note.number] == True and (control == self.keysList[num][note.number] or control == self.keysList[num][note.number+5])):
+                if (self.instruments[num].hit[note.number] == True and control == self.keysList[num][note.number]):
                     self.endPick(num)
 
         if self.keysList[num] is not None:
@@ -670,9 +669,10 @@ class GuitarScene(Scene):
             self.engine.view.setViewport(1,0)
 
     def getPlayerNum(self, control):
-        for i, player in enumerate(self.playerList):
-            if control and control in player.keyList:
-                return i
+        return 0
+        # for i, player in enumerate(self.playerList):
+        #     if control and control in player.keyList:
+        #         return i
 
     def render(self, visibility, topMost):
 

@@ -692,7 +692,7 @@ class Instrument(object):
                 size = (self.boardWidth / self.strings / 2, self.boardWidth / self.strings / 2.4)
                 texSize = (n / self.lanenumber, n / self.lanenumber + 1 / self.lanenumber)
 
-            if controls.getState(self.keys[n]) or controls.getState(self.keys[n+5]) or pressed: # fret press
+            if controls.getState(self.keys[n]) or pressed: # fret press
                 if self.isDrum:
                     if n == 4: # bass drum
                         texY = (3.0 / self.fretImgColNumber, 4.0 / self.fretImgColNumber)

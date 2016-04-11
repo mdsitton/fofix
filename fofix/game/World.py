@@ -77,9 +77,8 @@ class World:
     def createPlayer(self, name):
         playerNum = len(self.players)
         player = Player.Player(name, playerNum)
-        player.controller = self.engine.input.activeGameControls[playerNum]
-        player.controlType = self.engine.input.controls.type[player.controller]
-        player.keyList = Player.playerkeys[playerNum]
+        #player.controller = self.engine.input.activeGameControls[playerNum]
+        #player.controlType = self.engine.input.controls.type[player.controller]
         player.configController()
         self.players.append(player)
         self.songQueue.parts.append(player.part.id)

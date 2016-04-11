@@ -171,7 +171,7 @@ class Drum(Instrument):
         #adding bass drum hit every bass fret:
         for time, note in self.matchingNotes:
             for i in range(5):
-                if note.number == i and (controls.getState(self.keys[i]) or controls.getState(self.keys[i+5])) and self.drumsHeldDown[i] > 0:
+                if note.number == i and controls.getState(self.keys[i]) and self.drumsHeldDown[i] > 0:
                     return self.hitNote(time, note)
 
         return False

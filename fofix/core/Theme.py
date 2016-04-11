@@ -42,9 +42,8 @@ from fofix.core.constants import *
 from fofix.core.utils import hexToColor, isTrue
 
 #Theme Constants.
-GUITARTYPES = [0, 1, 4]
-DRUMTYPES   = [2, 3]
-MICTYPES    = [5]
+GUITARTYPES = [0]
+DRUMTYPES   = [2]
 
 defaultDict = {}
 classNames = {'partDiff': lambda x: ThemeParts(x)}

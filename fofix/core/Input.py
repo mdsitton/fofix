@@ -87,10 +87,8 @@ class Input(Task):
         self.keyListeners         = []
         self.systemListeners      = []
         self.controls             = Controls()
-        self.activeGameControls   = []
-        self.p2Nav                = self.controls.p2Nav
+        self.activeGameControls   = [0]
         self.type1                = self.controls.type[0]
-        self.keyCheckerMode       = Config.get("game","key_checker_mode")
         self.disableKeyRepeat()
 
         self.gameGuitars = 0
@@ -108,7 +106,6 @@ class Input(Task):
     def pluginControls(self):
         self.gameDrums = 0
         self.gameGuitars = 0
-        Player.pluginControls(self.activeGameControls)
         for i in self.activeGameControls:
             if self.controls.type[i] in Player.DRUMTYPES:
                 self.gameDrums += 1
@@ -167,7 +164,3 @@ class Input(Task):
             elif event.type == pygame.ACTIVEEVENT: # akedrou - catch for pause onLoseFocus
                 if (event.state == 2 or event.state == 6) and event.gain == 0:
                     self.broadcastEvent(self.keyListeners, "lostFocus") # as a key event, since Scene clients don't handle system events
-
-    # glorandwarf: sets the new key mapping and checks for a conflict
-    def setNewKeyMapping(self, section, option, key, control):
-        return Player.setNewKeyMapping(section, option, key, control)

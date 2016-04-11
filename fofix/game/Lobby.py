@@ -31,7 +31,7 @@ import os
 from OpenGL.GL import *
 import pygame
 
-from fofix.core.Player import GUITARTYPES, DRUMTYPES, MICTYPES
+from fofix.core.Player import GUITARTYPES, DRUMTYPES
 from fofix.core.Input import KeyListener
 from fofix.core.Image import drawImage
 from fofix.core.constants import *
@@ -69,9 +69,6 @@ class Lobby(Layer, KeyListener):
 
         self.fontDict         = self.engine.data.fontDict
 
-        self.engine.input.activeGameControls = [i for i in range(4)]
-        self.engine.input.pluginControls()
-
         self.theme = self.engine.theme
 
         self.playerNames = Player.playername
@@ -94,8 +91,7 @@ class Lobby(Layer, KeyListener):
             c.append(name[0])
             n.append(name[1])
             self.engine.config.set("game", "player%d" % i, name[1])
-        self.engine.input.activeGameControls = c
-        self.engine.input.pluginControls()
+        # self.engine.input.activeGameControls = c
         for name in n: #this needs to be done after pluginControls so controller assignments are handled properly.
             self.engine.world.createPlayer(name)
 

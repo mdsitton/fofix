@@ -338,9 +338,11 @@ class SongChoosingScene(Scene):
                 vocals.append(part)
             else:
                 guitars.append(part)
+        print drums
         choose = [[] for i in self.players]
         for i, player in enumerate(self.players):
             j = self.engine.world.songQueue.getParts()[i]
+            print j, player.controlType
             if player.controlType == 2 or player.controlType == 3:
                 choose[i] = drums
             elif player.controlType == 5:
@@ -421,6 +423,7 @@ class SongChoosingScene(Scene):
                     player.difficulty = d
                 else:
                     showDialog = True
+        print choose
         if showDialog:
             ready = False
             while not ready:

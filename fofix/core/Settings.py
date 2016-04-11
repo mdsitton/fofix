@@ -43,7 +43,6 @@ from fofix.core import Version
 from fofix.core import Config
 from fofix.core import Player
 from fofix.core import Mod
-from fofix.core import VFS
 from fofix.core import Log
 
 class ConfigChoice(Menu.Choice):
@@ -153,7 +152,6 @@ class SettingsMenu(Menu.Menu):
         self.fretSettings = [
             ConfigChoice(self.engine, self.engine.config, "fretboard", "point_of_view", autoApply = True),
             ConfigChoice(self.engine, self.engine.config, "game", "frets_under_notes", autoApply = True), #MFH
-            ConfigChoice(self.engine, self.engine.config, "game", "nstype", autoApply = True),      #blazingamer
             ConfigChoice(self.engine, self.engine.config, "coffee", "neckSpeed", autoApply = True),
         ]
         self.fretSettingsMenu = Menu.Menu(self.engine, self.fretSettings, pos = (self.opt_text_x, self.opt_text_y), textColor = self.opt_text_color, selectedColor = self.opt_selected_color)
