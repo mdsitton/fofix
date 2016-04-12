@@ -166,7 +166,6 @@ class Main():
                 vidPlayer.play()
                 self.engine.view.pushLayer(vidPlayer)
                 self.videoLayer = True
-                self.engine.ticksAtStart = pygame.time.get_ticks()
                 while not vidPlayer.finished:
                     self.engine.run()
                 self.engine.view.popLayer(vidPlayer)
@@ -176,7 +175,6 @@ class Main():
 
         # Run the main game loop.
         try:
-            self.engine.ticksAtStart = pygame.time.get_ticks()
             while self.engine.run():
                 pass
         except KeyboardInterrupt:

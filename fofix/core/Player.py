@@ -31,41 +31,6 @@ from fofix.core import Config
 from fofix.core import constants
 from fofix.core import Log
 
-class ConfigOption:
-    def __init__(self, id, text):
-        self.id   = id
-        self.text = text
-
-    def __str__(self):
-        return self.text
-
-    def __repr__(self):
-        return self.text
-
-    def __cmp__(self, other):
-        try:
-            if self.id > other.id:
-                return 1
-            elif self.id == other.id:
-                return 0
-            else:
-                return -1
-        except:
-            return -1
-
-def sortOptionsByKey(dict):
-    a = {}
-    for k in dict.keys():
-        a[k] = ConfigOption(k, dict[k])
-    return a
-
-#akedrou - Redoing this, sir. Redoing this...
-CONTROL1          = [1<<n for n in xrange(20)]
-CONTROL2          = [1<<n for n in xrange(20, 40)]
-CONTROL3          = [1<<n for n in xrange(40, 60)]
-CONTROL4          = [1<<n for n in xrange(60, 80)]
-CONTROLS          = [CONTROL1, CONTROL2, CONTROL3, CONTROL4]
-
 
 LEFT    = 0x1
 RIGHT   = 0x2
