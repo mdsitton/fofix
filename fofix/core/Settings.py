@@ -170,7 +170,6 @@ class SettingsMenu(Menu.Menu):
         self.videoSettingsMenu = Menu.Menu(self.engine, self.videoSettings, pos = (self.opt_text_x, self.opt_text_y), textColor = self.opt_text_color, selectedColor = self.opt_selected_color)
 
         self.audioSettings = [
-            ConfigChoice(engine, engine.config, "game", "sustain_muting", autoApply = True),   #myfingershurt
             ConfigChoice(engine, engine.config, "game", "mute_drum_fill", autoApply = True),
             ConfigChoice(engine, engine.config, "audio", "mute_last_second", autoApply = True), #MFH
             ConfigChoice(engine, engine.config, "game", "bass_kick_sound", autoApply = True),   #myfingershurt

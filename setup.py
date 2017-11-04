@@ -26,12 +26,13 @@
 from distutils.core import setup, Extension
 import distutils.ccompiler
 from distutils.dep_util import newer
-from Cython.Distutils import build_ext as _build_ext
 from distutils.command.install import install as _install
-from distutils.cmd import Command
 import sys, glob, os
 import subprocess
 import shlex
+
+from setuptools import setup, Extension, Command
+from Cython.Build import cythonize
 
 import numpy as np
 
@@ -238,20 +239,6 @@ def pc_exists(pkg):
     else:
         return False
 
-
-# {py26hack} - Python 2.7 has subprocess.check_output for this purpose.
-def grab_stdout(*args, **kw):
-    '''Obtain standard output from a subprocess invocation, raising an exception
-    if the subprocess fails.'''
-
-    kw['stdout'] = subprocess.PIPE
-    proc = subprocess.Popen(*args, **kw)
-    stdout = proc.communicate()[0]
-    if proc.returncode != 0:
-        raise RuntimeError, 'subprocess %r returned %d' % (args[0], proc.returncode)
-    return stdout
-
-
 # Blacklist MinGW-specific dependency libraries on Windows.
 if os.name == 'nt':
     lib_blacklist = ['m', 'mingw32']
@@ -281,8 +268,8 @@ def pc_info(pkg, altnames=[]):
                 print >>sys.stderr, '(Check that you have the appropriate development package installed.)'
             sys.exit(1)
 
-    cflags = shlex.split(grab_stdout([pkg_config, '--cflags', pkg]))
-    libs = shlex.split(grab_stdout([pkg_config, '--libs', pkg]))
+    cflags = shlex.split(subprocess.check_output([pkg_config, '--cflags', pkg]))
+    libs = shlex.split(subprocess.check_output([pkg_config, '--libs', pkg]))
 
     # Pick out anything interesting in the cflags and libs, and
     # silently drop the rest.
@@ -347,33 +334,6 @@ def combine_info(*args):
     return info
 
 
-# Extend the build_ext command further to rebuild the import libraries on
-# an MSVC build under Windows so they actually work.
-class build_ext(_build_ext):
-    def run(self, *args, **kw):
-        if self.compiler is None:
-            self.compiler = distutils.ccompiler.get_default_compiler()
-        if self.compiler == 'msvc':
-            msvc = distutils.ccompiler.new_compiler(compiler='msvc', verbose=self.verbose, dry_run=self.dry_run, force=self.force)
-            msvc.initialize()
-            for deffile in glob.glob(os.path.join('..', 'win32', 'deps', 'lib', '*.def')):
-                libfile = os.path.splitext(deffile)[0] + '.lib'
-                if newer(deffile, libfile):
-                    msvc.spawn([msvc.lib, '/nologo', '/machine:x86', '/out:'+libfile, '/def:'+deffile])
-
-            # Also add the directory containing the msinttypes headers to the include path.
-            self.include_dirs.append(os.path.join('.', 'win32', 'deps', 'include', 'msinttypes'))
-
-        return _build_ext.run(self, *args, **kw)
-
-    def build_extension(self, ext):
-        # If we're using MSVC, specify C++ exception handling behavior to avoid compiler warnings.
-        if self.compiler.compiler_type == 'msvc':
-            ext.extra_compile_args.append('/EHsc')
-
-        return _build_ext.build_extension(self, ext)
-
-
 # Make "setup.py install" do nothing until we configure something more sensible.
 class install(_install):
     def run(self, *args, **kw):
@@ -426,12 +386,12 @@ class xgettext(Command):
          ['-k' + funcname for funcname in self.FUNCNAMES] +
           glob.glob('*.py'))
 
+if os.name == 'nt':
+    vidInclude = ['.', 'win32/deps/include/msinttypes']
+else:
+    vidInclude = ['.']
 
-# Add the common arguments to setup().
-# This includes arguments to cause FoFiX's extension modules to be built.
-setup_args.update({
-  'options': options,
-  'ext_modules': [
+extensions = [
     Extension('fofix.lib.cmgl', ['fofix/core/cmgl/cmgl.pyx'], **combine_info(numpy_info, gl_info)),
     Extension('fofix.lib._pypitch',
               language='c++',
@@ -440,19 +400,25 @@ setup_args.update({
     Extension('fofix.lib._VideoPlayer',
               ['fofix/core/VideoPlayer/_VideoPlayer.pyx', 'fofix/core/VideoPlayer/VideoPlayer.c'],
               **combine_info(gl_info, ogg_info, theoradec_info, glib_info, swscale_info,
-              {'include_dirs': ['.']})),
+              {'include_dirs': vidInclude})),
     Extension('fofix.lib._MixStream',
               ['fofix/core/MixStream/_MixStream.pyx', 'fofix/core/MixStream/MixStream.c',
                'fofix/core/MixStream/vorbis.c'] + extra_soundtouch_src,
               **combine_info(vorbisfile_info, soundtouch_info, glib_info, gthread_info, sdl_info, sdl_mixer_info)),
-  ],
-  'cmdclass': {'build_ext': build_ext, 'install': install, 'msgfmt': msgfmt, 'xgettext': xgettext},
-})
+]
+
+# Add the common arguments to setup().
+# This includes arguments to cause FoFiX's extension modules to be built.
+setup_args.update({
+  'options': options,
+  'ext_modules': cythonize(extensions),
+  'cmdclass': {'install': install, 'msgfmt': msgfmt, 'xgettext': xgettext},
+ })
 
 # If we're on Windows, add the dependency directory to the PATH so py2exe will
 # pick up necessary DLLs from there.
-if os.name == 'nt':
-    os.environ['PATH'] = os.path.abspath(os.path.join('.', 'win32', 'deps', 'bin')) + os.pathsep + os.environ['PATH']
+# if os.name == 'nt':
+#     os.environ['PATH'] = os.path.abspath(os.path.join('.', 'win32', 'deps', 'bin'))  os.pathsep  os.environ['PATH']
 
 # And finally...
 setup(**setup_args)
